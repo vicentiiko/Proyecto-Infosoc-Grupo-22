@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}Página no encontrada{% endblock %}
+{% block antetitulo %}Error 404{% endblock %}
+{% block h1 %}Página no encontrada{% endblock %}
+{% block contenido %}
+<section class="tarjeta tarjeta--centrada">
+  <p>La página que busca no existe o fue movida.</p>
+  <a class="boton" href="{% url 'inicio' %}">Volver al inicio</a>
+</section>
+{% endblock %}

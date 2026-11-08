@@ -1,6 +1,10 @@
 # Proyecto Infosoc – Grupo 22 (Colegio Diferencial)
 
-Plataforma web (Django) de comunicación entre profesores y apoderados.
+Plataforma web de comunicación entre profesores y apoderados de un colegio diferencial.
+Los profesores registran observaciones de sus alumnos y envían mensajes a los apoderados;
+los apoderados entran a ver la información de sus pupilos.
+
+**Tecnologías:** Python 3.12+, Django 6.1, SQLite. Interfaz en español (`es-cl`, hora de Santiago).
 
 ## Requisitos
 - **Python 3.12 o superior** (Django 6 lo requiere). Descargar desde https://www.python.org/downloads/
@@ -18,7 +22,7 @@ Todos los comandos se escriben en una terminal abierta **en la carpeta del proye
    ```bash
    python -m venv venv
    ```
-   (En Windows, si `python` no funciona, usa `py -m venv venv`.)
+   (En Windows, si `python` no funciona, usa `py -m venv venv`. En Linux/Mac puede ser `python3`.)
 
 2. Activar el entorno virtual:
    - **Windows (PowerShell):**
@@ -76,7 +80,7 @@ python manage.py runserver
 | Profesor | `92000001-1` | `PruebaProfesor001!` |
 | Apoderado | `91000001-1` | `PruebaApoderado001!` |
 
-Los RUT de profesores van de `92000001-1` a `92000020-0` y los de apoderados de `91000001-1` en adelante; la contraseña sigue el mismo patrón (`PruebaProfesor002!`, `PruebaApoderado002!`, etc.).
+Hay 20 profesores (RUT `92000001-1` a `92000020-0`) y 53 apoderados (RUT `91000001-1` a `91000053-3`); la contraseña sigue el mismo patrón (`PruebaProfesor002!`, `PruebaApoderado002!`, etc.).
 
 ## Problemas comunes
 | Problema | Solución |
@@ -92,6 +96,30 @@ Los RUT de profesores van de `92000001-1` a `92000020-0` y los de apoderados de 
 - Profesor: ver sus cursos y alumnos, escribir observaciones, enviar mensajes a apoderados
 - Apoderado: ver sus pupilos, observaciones y mensajes recibidos
 
+## Páginas
+| URL | Quién | Qué muestra |
+|---|---|---|
+| `/login/` | Todos | Ingreso con RUT y contraseña |
+| `/` | Todos | Redirige al panel según el rol del usuario |
+| `/profesor/` | Profesor | Sus cursos |
+| `/profesor/curso/<id>/` | Profesor | Alumnos de un curso |
+| `/profesor/alumno/<rut>/` | Profesor | Ficha del alumno y nueva observación |
+| `/profesor/mensaje/nuevo/` | Profesor | Enviar mensaje a apoderados |
+| `/apoderado/` | Apoderado | Sus pupilos y mensajes recibidos |
+| `/apoderado/alumno/<rut>/` | Apoderado | Observaciones de un pupilo |
+| `/admin/` | Superusuario | Panel de administración de Django |
+
+Un usuario que no es profesor ni apoderado ve la página `sin_rol`.
+
+## Modelo de datos
+- **Usuario**: modelo de usuario propio; se identifica por RUT. Puede ser **Profesor** (asignatura) o **Apoderado** (teléfono).
+- **Curso**: nivel y tamaño. Se une a profesores mediante **ProfesorCurso**, que indica si es profesor jefe.
+- **Alumno**: pertenece a un curso. Se une a apoderados mediante **AlumnoApoderado** (parentesco y si es el apoderado principal).
+- **Mensaje**: lo escribe un profesor y lo reciben uno o más apoderados.
+- **Observacion**: la escribe un profesor sobre un alumno.
+
+El diagrama del esquema está en `Diagrama en blanco.pdf`.
+
 ## Estructura del proyecto
 ```
 config/          configuración de Django (settings, urls)
@@ -100,4 +128,8 @@ colegio/         app principal: modelos, vistas, formularios, plantillas
 templates/       base.html y login.html
 static/css/      estilos
 colegio.sql      esquema y datos de prueba originales
+Diagrama en blanco.pdf   diagrama del modelo de datos
 ```
+
+## Pendiente
+- Pruebas automáticas: `colegio/tests.py` está vacío. Cuando existan, se corren con `python manage.py test`.

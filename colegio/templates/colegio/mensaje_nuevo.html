@@ -1,14 +1,49 @@
 {% extends "base.html" %}
+{% block titulo %}Nuevo mensaje{% endblock %}
+{% block migas %}<a href="{% url 'profesor_panel' %}">Mis cursos</a><span>Nuevo mensaje</span>{% endblock %}
+{% block antetitulo %}Comunicación con apoderados{% endblock %}
+{% block h1 %}Redactar mensaje{% endblock %}
 {% block contenido %}
-<div class="card">
-  <h2>Nuevo mensaje</h2>
-  <form method="post">{% csrf_token %}
-    <p><strong>Destinatarios</strong></p>
-    {{ form.destinatarios }}
-    <p><strong>Mensaje</strong></p>
-    {{ form.contenido }}
-    {{ form.errors }}
-    <p><button class="btn">Enviar</button> <a href="{% url 'profesor_panel' %}">Cancelar</a></p>
-  </form>
-</div>
+<form method="post" class="tarjeta formulario">{% csrf_token %}
+  {% if form.non_field_errors %}<div class="aviso aviso--error" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+
+  <fieldset class="campo">
+    <legend class="campo__etiqueta">Destinatarios</legend>
+    <div class="campo__fila">
+      <span class="campo__ayuda">Apoderados de los alumnos de sus cursos.</span>
+      <button type="button" class="enlace" id="todos">Seleccionar todos</button>
+    </div>
+    <div class="opciones">
+    {% for c in form.destinatarios %}
+      <label class="opcion">{{ c.tag }}<span>{{ c.choice_label }}</span></label>
+    {% empty %}
+      <p class="vacio">No hay apoderados asociados a sus cursos.</p>
+    {% endfor %}
+    </div>
+    {% for e in form.destinatarios.errors %}<span class="campo__error">{{ e }}</span>{% endfor %}
+  </fieldset>
+
+  <label class="campo">
+    <span class="campo__etiqueta">Mensaje</span>
+    <textarea name="contenido" rows="7" placeholder="Estimados apoderados:" required>{{ form.contenido.value|default_if_none:"" }}</textarea>
+    {% for e in form.contenido.errors %}<span class="campo__error">{{ e }}</span>{% endfor %}
+  </label>
+
+  <div class="acciones">
+    <a class="boton boton--secundario" href="{% url 'profesor_panel' %}">Cancelar</a>
+    <button class="boton" type="submit">Enviar mensaje</button>
+  </div>
+</form>
+<script>
+  (function () {
+    var boton = document.getElementById("todos");
+    if (!boton) return;
+    boton.addEventListener("click", function () {
+      var cajas = document.querySelectorAll('.opciones input[type="checkbox"]');
+      var marcar = Array.prototype.some.call(cajas, function (c) { return !c.checked; });
+      cajas.forEach(function (c) { c.checked = marcar; });
+      boton.textContent = marcar ? "Quitar todos" : "Seleccionar todos";
+    });
+  })();
+</script>
 {% endblock %}

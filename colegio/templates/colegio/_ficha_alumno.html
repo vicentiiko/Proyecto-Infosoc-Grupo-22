@@ -1,0 +1,8 @@
+<section class="ficha">
+  <span class="ficha__inicial" aria-hidden="true">{{ alumno.nombre|slice:":1" }}</span>
+  <dl class="ficha__datos">
+    <div><dt>Nombre</dt><dd>{{ alumno.nombre }}</dd></div>
+    <div><dt>RUT</dt><dd>{{ alumno.pk }}</dd></div>
+    <div><dt>Curso</dt><dd>{% if alumno.curso %}{{ alumno.curso.nivel }} <span class="tenue">(N° {{ alumno.curso.pk }})</span>{% else %}Sin curso{% endif %}</dd></div>
+  </dl>
+</section>

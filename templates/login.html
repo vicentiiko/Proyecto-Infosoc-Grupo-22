@@ -1,12 +1,48 @@
 {% extends "base.html" %}
-{% block contenido %}
-<div class="card" style="max-width:380px;margin:2rem auto">
-  <h2>Iniciar sesión</h2>
-  <form method="post">{% csrf_token %}
-    {% if form.errors %}<p class="error">RUT o contraseña incorrectos.</p>{% endif %}
-    <p><label>RUT (ej: 92000001-1)<input name="username" required autofocus></label></p>
-    <p><label>Contraseña<input name="password" type="password" required></label></p>
-    <button class="btn">Entrar</button>
-  </form>
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block clase_body %}cuerpo-login{% endblock %}
+{% block pagina %}
+<div class="login">
+  <aside class="login__panel">
+    <div class="login__emblema">
+      <span class="login__logo-marco">{% include "partials/escudo.html" with clase="escudo--login" %}</span>
+      <p class="antetitulo antetitulo--claro">Portal Institucional</p>
+      <h1>Escuela Especial Diversidad</h1>
+      <div class="filete filete--claro" aria-hidden="true"><span class="figuras"><i class="fig fig--cuadrado"></i><i class="fig fig--triangulo"></i><i class="fig fig--rombo"></i><i class="fig fig--circulo"></i></span></div>
+      <p class="login__cita">Portal de comunicación entre profesores y apoderados</p>
+    </div>
+    <ul class="login__puntos">
+      <li><strong>Profesores</strong> registran observaciones y se comunican con las familias.</li>
+      <li><strong>Apoderados</strong> siguen el proceso de sus pupilos y reciben mensajes.</li>
+    </ul>
+  </aside>
+
+  <main class="login__formulario">
+    <div class="login__caja">
+      <p class="antetitulo">Acceso</p>
+      <h2>Iniciar sesión</h2>
+      <p class="tenue">Ingrese con su RUT y la contraseña entregada por el establecimiento.</p>
+
+      {% if form.errors %}
+        <div class="aviso aviso--error" role="alert">El RUT o la contraseña no son correctos. Revise los datos e intente nuevamente.</div>
+      {% endif %}
+
+      <form method="post" class="formulario">{% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <label class="campo">
+          <span class="campo__etiqueta">RUT</span>
+          <input name="username" value="{{ form.username.value|default_if_none:'' }}" placeholder="12345678-9" autocomplete="username" required autofocus>
+          <span class="campo__ayuda">Sin puntos, con guion y dígito verificador.</span>
+        </label>
+        <label class="campo">
+          <span class="campo__etiqueta">Contraseña</span>
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="boton boton--ancho" type="submit">Ingresar al portal</button>
+      </form>
+
+      <p class="login__legal">© {% now "Y" %} Escuela Especial Diversidad</p>
+    </div>
+  </main>
 </div>
 {% endblock %}

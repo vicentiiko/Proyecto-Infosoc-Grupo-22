@@ -1,22 +1,82 @@
-{% load static %}
-<!doctype html>
+{% load static %}<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titulo %}Colegio Diferencial{% endblock %}</title>
+  <title>{% block titulo %}Portal{% endblock %} · Escuela Especial Diversidad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/logo.png' %}">
   <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
 </head>
-<body>
-  <header>
-    <strong><a href="{% url 'inicio' %}" style="margin:0">Colegio Diferencial</a></strong>
-    <nav>
+<body class="{% block clase_body %}{% endblock %}">
+{% block pagina %}
+  <div class="franja">
+    <div class="contenedor franja__fila">
+      <span>Portal Institucional</span>
+      <span class="franja__fecha">{% now "l j \d\e F \d\e Y" %}</span>
+    </div>
+  </div>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera__fila">
+      <a class="marca" href="{% url 'inicio' %}">
+        {% include "partials/escudo.html" with clase="escudo--cabecera" %}
+        <span class="marca__texto">
+          <span class="marca__nombre">Escuela Especial Diversidad</span>
+          <span class="marca__lema">Portal de Comunicación Escolar</span>
+        </span>
+      </a>
+
       {% if user.is_authenticated %}
-        <span>{{ user.nombre }}</span>
-        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button>Salir</button></form>
+      <nav class="menu" aria-label="Menú principal">
+        {% if user.es_profesor %}
+          <a href="{% url 'profesor_panel' %}">Mis cursos</a>
+          <a href="{% url 'mensaje_nuevo' %}">Nuevo mensaje</a>
+        {% elif user.es_apoderado %}
+          <a href="{% url 'apoderado_panel' %}">Mis pupilos</a>
+        {% endif %}
+        <div class="usuario">
+          <span class="usuario__inicial" aria-hidden="true">{{ user.nombre|slice:":1" }}</span>
+          <span class="usuario__datos">
+            <span class="usuario__nombre">{{ user.nombre }}</span>
+            <span class="usuario__rol">{% if user.es_profesor %}Profesor(a){% elif user.es_apoderado %}Apoderado(a){% else %}Usuario{% endif %}</span>
+          </span>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+            <button class="boton-salir" type="submit">Cerrar sesión</button>
+          </form>
+        </div>
+      </nav>
       {% endif %}
-    </nav>
+    </div>
   </header>
-  <main>{% block contenido %}{% endblock %}</main>
+
+  {% block portada %}
+  <section class="portada">
+    <div class="contenedor">
+      <nav class="migas" aria-label="Ruta">{% block migas %}{% endblock %}</nav>
+      <p class="antetitulo">{% block antetitulo %}{% endblock %}</p>
+      <h1>{% block h1 %}{% endblock %}</h1>
+      <div class="filete" aria-hidden="true"><span class="figuras"><i class="fig fig--cuadrado"></i><i class="fig fig--triangulo"></i><i class="fig fig--rombo"></i><i class="fig fig--circulo"></i></span></div>
+    </div>
+  </section>
+  {% endblock %}
+
+  <main class="contenedor principal">{% block contenido %}{% endblock %}</main>
+
+  <footer class="pie">
+    <div class="contenedor pie__fila">
+      <div class="pie__marca">
+        {% include "partials/escudo.html" with clase="escudo--pie" %}
+        <div>
+          <strong>Escuela Especial Diversidad</strong>
+          <p>Portal de comunicación entre profesores y apoderados.</p>
+        </div>
+      </div>
+      <p class="pie__legal">© {% now "Y" %} Escuela Especial Diversidad · Proyecto Infosoc, Grupo 22</p>
+    </div>
+  </footer>
+{% endblock %}
 </body>
 </html>

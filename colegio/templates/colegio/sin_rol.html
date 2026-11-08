@@ -1,2 +1,10 @@
 {% extends "base.html" %}
-{% block contenido %}<div class="card"><h2>Sin rol asignado</h2><p>Tu cuenta no es de profesor ni de apoderado. Pide a un administrador que la configure.</p></div>{% endblock %}
+{% block titulo %}Cuenta sin rol{% endblock %}
+{% block antetitulo %}Cuenta en revisión{% endblock %}
+{% block h1 %}Sin rol asignado{% endblock %}
+{% block contenido %}
+<section class="tarjeta tarjeta--centrada">
+  <p>Su cuenta no está registrada como profesor ni como apoderado.</p>
+  <p class="tenue">Comuníquese con la administración del establecimiento para que la configuren.</p>
+</section>
+{% endblock %}

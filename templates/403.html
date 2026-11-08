@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}Acceso restringido{% endblock %}
+{% block antetitulo %}Error 403{% endblock %}
+{% block h1 %}Acceso restringido{% endblock %}
+{% block contenido %}
+<section class="tarjeta tarjeta--centrada">
+  <p>Su cuenta no tiene permiso para ver esta sección del portal.</p>
+  <a class="boton" href="{% url 'inicio' %}">Volver al inicio</a>
+</section>
+{% endblock %}
