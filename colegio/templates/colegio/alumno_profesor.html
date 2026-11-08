@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="card">
+  <h2>{{ alumno.nombre }}</h2>
+  <p class="muted">{{ alumno.curso }}</p>
+  <h3>Observaciones</h3>
+  <ul class="limpia">
+  {% for o in observaciones %}<li>{{ o.contenido }}<br><span class="muted">{{ o.fecha }} · {{ o.profesor.usuario.nombre }}</span></li>
+  {% empty %}<li class="muted">Sin observaciones.</li>{% endfor %}
+  </ul>
+</div>
+<div class="card">
+  <h3>Agregar observación</h3>
+  <form method="post">{% csrf_token %}{{ form.contenido }}<p><button class="btn">Guardar</button></p></form>
+  <a href="{% url 'curso_detalle' alumno.curso.pk %}">← Volver al curso</a>
+</div>
+{% endblock %}

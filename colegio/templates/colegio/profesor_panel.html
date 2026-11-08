@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="card">
+  <h2>Mis cursos</h2>
+  <ul class="limpia">
+  {% for c in cursos %}<li><a href="{% url 'curso_detalle' c.pk %}">{{ c }}</a> <span class="muted">· {{ c.alumnos.count }} alumnos</span></li>
+  {% empty %}<li class="muted">Aún no tienes cursos asignados.</li>{% endfor %}
+  </ul>
+</div>
+<div class="card">
+  <h2>Mensajes enviados</h2>
+  <p><a class="btn" href="{% url 'mensaje_nuevo' %}">Nuevo mensaje</a></p>
+  <ul class="limpia">
+  {% for m in mensajes %}<li>{{ m.contenido }}<br><span class="muted">{{ m.fecha }} · a {{ m.destinatarios.count }} apoderado(s)</span></li>
+  {% empty %}<li class="muted">Sin mensajes.</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

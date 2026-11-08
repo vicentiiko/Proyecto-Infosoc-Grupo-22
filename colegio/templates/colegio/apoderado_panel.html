@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="card">
+  <h2>Mis pupilos</h2>
+  <ul class="limpia">
+  {% for a in alumnos %}<li><a href="{% url 'alumno_apoderado' a.pk %}">{{ a.nombre }}</a> <span class="muted">· {{ a.curso }}</span></li>
+  {% empty %}<li class="muted">No tienes alumnos asociados.</li>{% endfor %}
+  </ul>
+</div>
+<div class="card">
+  <h2>Mensajes recibidos</h2>
+  <ul class="limpia">
+  {% for m in mensajes %}<li>{{ m.contenido }}<br><span class="muted">{{ m.fecha }} · {{ m.profesor.usuario.nombre }} ({{ m.profesor.asignatura }})</span></li>
+  {% empty %}<li class="muted">Sin mensajes.</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

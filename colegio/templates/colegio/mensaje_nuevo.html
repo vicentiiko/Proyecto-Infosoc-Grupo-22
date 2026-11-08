@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="card">
+  <h2>Nuevo mensaje</h2>
+  <form method="post">{% csrf_token %}
+    <p><strong>Destinatarios</strong></p>
+    {{ form.destinatarios }}
+    <p><strong>Mensaje</strong></p>
+    {{ form.contenido }}
+    {{ form.errors }}
+    <p><button class="btn">Enviar</button> <a href="{% url 'profesor_panel' %}">Cancelar</a></p>
+  </form>
+</div>
+{% endblock %}

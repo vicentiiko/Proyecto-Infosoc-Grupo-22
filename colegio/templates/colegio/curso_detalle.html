@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="card">
+  <h2>{{ curso }}</h2>
+  <ul class="limpia">
+  {% for a in alumnos %}<li><a href="{% url 'alumno_profesor' a.pk %}">{{ a.nombre }}</a> <span class="muted">{{ a.pk }}</span></li>
+  {% empty %}<li class="muted">Sin alumnos.</li>{% endfor %}
+  </ul>
+  <p><a href="{% url 'profesor_panel' %}">← Volver</a></p>
+</div>
+{% endblock %}

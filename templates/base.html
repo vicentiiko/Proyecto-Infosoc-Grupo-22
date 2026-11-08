@@ -1,0 +1,22 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Colegio Diferencial{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
+</head>
+<body>
+  <header>
+    <strong><a href="{% url 'inicio' %}" style="margin:0">Colegio Diferencial</a></strong>
+    <nav>
+      {% if user.is_authenticated %}
+        <span>{{ user.nombre }}</span>
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button>Salir</button></form>
+      {% endif %}
+    </nav>
+  </header>
+  <main>{% block contenido %}{% endblock %}</main>
+</body>
+</html>

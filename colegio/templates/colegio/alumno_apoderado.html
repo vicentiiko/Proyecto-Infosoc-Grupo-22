@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="card">
+  <h2>{{ alumno.nombre }}</h2>
+  <p class="muted">{{ alumno.curso }}</p>
+  <h3>Observaciones de los profesores</h3>
+  <ul class="limpia">
+  {% for o in observaciones %}<li>{{ o.contenido }}<br><span class="muted">{{ o.fecha }} · {{ o.profesor.usuario.nombre }}</span></li>
+  {% empty %}<li class="muted">Sin observaciones.</li>{% endfor %}
+  </ul>
+  <p><a href="{% url 'apoderado_panel' %}">← Volver</a></p>
+</div>
+{% endblock %}

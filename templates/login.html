@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="card" style="max-width:380px;margin:2rem auto">
+  <h2>Iniciar sesión</h2>
+  <form method="post">{% csrf_token %}
+    {% if form.errors %}<p class="error">RUT o contraseña incorrectos.</p>{% endif %}
+    <p><label>RUT (ej: 92000001-1)<input name="username" required autofocus></label></p>
+    <p><label>Contraseña<input name="password" type="password" required></label></p>
+    <button class="btn">Entrar</button>
+  </form>
+</div>
+{% endblock %}

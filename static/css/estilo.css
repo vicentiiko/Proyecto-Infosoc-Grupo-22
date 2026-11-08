@@ -1,0 +1,16 @@
+:root { --azul:#2b5fa8; --fondo:#f4f6fa; --borde:#d8dde6; --texto:#1f2933; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, sans-serif; background:var(--fondo); color:var(--texto); }
+header { background:var(--azul); color:#fff; padding:.8rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
+header a { color:#fff; text-decoration:none; margin-left:1rem; }
+header form { display:inline; }
+header button { background:none; border:0; color:#fff; cursor:pointer; margin-left:1rem; font:inherit; }
+main { max-width:900px; margin:1.5rem auto; padding:0 1rem; }
+.card { background:#fff; border:1px solid var(--borde); border-radius:8px; padding:1rem 1.2rem; margin-bottom:1rem; }
+.card h2 { margin-top:0; }
+.btn { display:inline-block; background:var(--azul); color:#fff; border:0; padding:.5rem 1rem; border-radius:6px; text-decoration:none; cursor:pointer; font:inherit; }
+input, textarea { width:100%; padding:.5rem; border:1px solid var(--borde); border-radius:6px; font:inherit; }
+ul.limpia { list-style:none; padding:0; margin:0; }
+ul.limpia li { padding:.4rem 0; border-bottom:1px solid var(--borde); }
+.muted { color:#6b7785; font-size:.9rem; }
+.error { color:#b3261e; }
