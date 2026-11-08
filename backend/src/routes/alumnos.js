@@ -64,4 +64,53 @@ router.get('/profesor/:rut', async (req, res) => {
   }
 });
 
+router.get('/perfil/:rut', async (req, res) => {
+  const { rut } = req.params;
+
+  try {
+    // A. Consultar alumno y su curso
+    const [alumnoRows] = await db.query(
+      `SELECT a.rut_alumno, a.nombre AS nombre_alumno, c.nivel AS curso
+       FROM alumno a
+       INNER JOIN curso c ON a.id_curso = c.id_curso
+       WHERE a.rut_alumno = ?`,
+      [rut]
+    );
+
+    if (alumnoRows.length === 0) {
+      return res.status(404).json({ error: 'Alumno no encontrado' });
+    }
+
+    const alumno = alumnoRows[0];
+
+    // B. Consultar contactos de apoderados (desde alumno_apoderado, apoderado y usuario)
+    const [apoderados] = await db.query(
+      `SELECT u.nombre AS nombre_apoderado, aa.parentesco, ap.telefono, aa.es_principal
+       FROM alumno_apoderado aa
+       INNER JOIN apoderado ap ON aa.rut_apoderado = ap.rut_apoderado
+       INNER JOIN usuario u ON ap.rut_apoderado = u.rut_usuario
+       WHERE aa.rut_alumno = ?
+       ORDER BY aa.es_principal DESC`,
+      [rut]
+    );
+
+    // C. Consultar observaciones del alumno
+    const [observaciones] = await db.query(
+      `SELECT o.id_observacion, o.contenido
+       FROM observacion o
+       WHERE o.rut_alumno = ?`,
+      [rut]
+    );
+
+    res.json({
+      ...alumno,
+      contactos: apoderados,
+      observaciones: observaciones
+    });
+  } catch (error) {
+    console.error('Error al obtener perfil del alumno:', error);
+    res.status(500).json({ error: 'Error al consultar perfil del alumno' });
+  }
+});
+
 module.exports = router;

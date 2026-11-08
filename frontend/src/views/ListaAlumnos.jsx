@@ -72,7 +72,11 @@ function ListaAlumnos() {
               alumnos.map((alum, idx) => (
                 <tr key={idx}>
                   <td>
-                    <span className="badge-name">{alum.nombre_alumno}</span>
+                    <span className="badge-name" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => navigate(`/alumnos/perfil/${alum.rut_alumno}`)}
+                    >
+                      {alum.nombre_alumno}</span>
                   </td>
                   <td>{alum.curso}</td>
                   <td>{alum.profesor_asignado}</td>
