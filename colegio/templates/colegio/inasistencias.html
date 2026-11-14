@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titulo %}Inasistencias{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'inasistencias' %}">Asistencia</a><span>Inasistencias</span>{% endblock %}
+{% block antetitulo %}Asistencia{% endblock %}
+{% block h1 %}Registro de inasistencias{% endblock %}
+{% block contenido %}
+{% include "partials/subnav_asistencia.html" %}
+<div class="barra-acciones">
+  {% if permisos.asistencia.editar %}
+    <a class="boton" href="{% url 'pasar_lista' %}">Pasar lista</a>
+    <a class="boton boton--secundario" href="{% url 'inasistencia_nueva' %}">Registrar una inasistencia</a>
+  {% endif %}
+</div>
+{% include "partials/filtros.html" %}
+
+<section class="tarjeta tarjeta--sin-relleno">
+  <header class="tarjeta__cabecera"><h2>Totales por curso</h2><span class="etiqueta">{{ total }} inasistencia{{ total|pluralize }}</span></header>
+  <div class="tabla-envoltura"><table class="tabla tabla--compacta">
+    <thead><tr><th>Curso</th><th class="num">Total</th><th class="num">Justificadas</th><th class="num">No justificadas</th></tr></thead>
+    <tbody>{% for c in por_curso %}<tr><td>{{ c.alumno__curso__nivel|default:"Sin curso" }}</td><td class="num"><strong>{{ c.total }}</strong></td><td class="num">{{ c.justificadas }}</td><td class="num">{{ c.injustificadas }}</td></tr>{% empty %}<tr><td colspan="4" class="vacio">Sin datos.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+
+<div class="dos-columnas">
+  <section class="tarjeta tarjeta--sin-relleno">
+    <header class="tarjeta__cabecera"><h2>Historial</h2></header>
+    {% if pagina %}
+    <div class="tabla-envoltura"><table class="tabla">
+      <thead><tr><th>Fecha</th><th>Estudiante</th><th>Estado</th><th>Motivo</th><th><span class="oculto">Acciones</span></th></tr></thead>
+      <tbody>{% for i in pagina %}
+        <tr><td>{{ i.fecha|date:"d-m-Y" }}</td>
+          <td><a href="{% url 'ficha' i.alumno.pk %}">{{ i.alumno.nombre }}</a><br><span class="tenue">{{ i.alumno.curso|default:"" }}</span></td>
+          <td>{% if i.justificada %}<span class="chip chip--ok">Justificada</span>{% else %}<span class="chip chip--alerta">No justificada</span>{% endif %}</td>
+          <td>{{ i.motivo|default:"—" }}<br><span class="traza">por {{ i.creado_por.nombre|default:"—" }}{% if i.suplente_id %} (en reemplazo, lo hizo {{ i.suplente.nombre }}){% endif %}</span></td>
+          <td class="tabla__accion">{% if permisos.asistencia.editar %}<a href="{% url 'inasistencia_editar' i.pk %}">Editar</a> · <a href="{% url 'inasistencia_eliminar' i.pk %}">Eliminar</a>{% endif %}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    {% else %}<p class="vacio">No hay inasistencias para los filtros elegidos.</p>{% endif %}
+  </section>
+  <aside>
+    <section class="tarjeta">
+      <h2>Total por estudiante</h2>
+      <p class="nota">Los 15 con más inasistencias según los filtros. Entre paréntesis, las justificadas.</p>
+      <ol class="ranking">
+      {% for r in resumen %}<li><a href="{% url 'ficha' r.alumno__rut %}">{{ r.alumno__nombre }}</a><span class="tenue">{{ r.alumno__curso__nivel|default:"" }}</span><strong>{{ r.total }} <small>({{ r.justificadas }})</small></strong></li>
+      {% empty %}<li class="vacio">Sin datos.</li>{% endfor %}
+      </ol>
+    </section>
+  </aside>
+</div>
+{% include "partials/paginacion.html" %}
+{% endblock %}

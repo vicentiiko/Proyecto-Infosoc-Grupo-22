@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}Atrasos{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'inasistencias' %}">Asistencia</a><span>Atrasos</span>{% endblock %}
+{% block antetitulo %}Asistencia{% endblock %}
+{% block h1 %}Registro de atrasos{% endblock %}
+{% block contenido %}
+{% include "partials/subnav_asistencia.html" %}
+<div class="barra-acciones">
+  {% if permisos.asistencia.editar %}<a class="boton" href="{% url 'atraso_nuevo' %}">Registrar atraso</a>{% endif %}
+</div>
+{% include "partials/filtros.html" %}
+
+<div class="dos-columnas">
+  <section class="tarjeta tarjeta--sin-relleno">
+    <header class="tarjeta__cabecera"><h2>Historial</h2><span class="etiqueta">{{ total }} atraso{{ total|pluralize }}</span></header>
+    {% if pagina %}
+    <div class="tabla-envoltura"><table class="tabla">
+      <thead><tr><th>Fecha</th><th>Llegada</th><th>Estudiante</th><th>Motivo</th><th><span class="oculto">Acciones</span></th></tr></thead>
+      <tbody>{% for a in pagina %}
+        <tr><td>{{ a.fecha|date:"d-m-Y" }}</td><td><strong>{{ a.hora_llegada|time:"H:i" }}</strong></td>
+          <td><a href="{% url 'ficha' a.alumno.pk %}">{{ a.alumno.nombre }}</a><br><span class="tenue">{{ a.alumno.curso|default:"" }}</span></td>
+          <td>{{ a.motivo|default:"—" }}<br><span class="traza">por {{ a.creado_por.nombre|default:"—" }}{% if a.suplente_id %} (en reemplazo, lo hizo {{ a.suplente.nombre }}){% endif %}</span></td>
+          <td class="tabla__accion">{% if permisos.asistencia.editar %}<a href="{% url 'atraso_editar' a.pk %}">Editar</a> · <a href="{% url 'atraso_eliminar' a.pk %}">Eliminar</a>{% endif %}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    {% else %}<p class="vacio">No hay atrasos para los filtros elegidos.</p>{% endif %}
+  </section>
+  <aside>
+    <section class="tarjeta">
+      <h2>Más atrasos</h2>
+      <p class="nota">Según los filtros aplicados.</p>
+      <ol class="ranking">
+      {% for r in resumen %}<li><a href="{% url 'ficha' r.alumno__rut %}">{{ r.alumno__nombre }}</a><span class="tenue">{{ r.alumno__curso__nivel|default:"" }}</span><strong>{{ r.total }}</strong></li>
+      {% empty %}<li class="vacio">Sin datos.</li>{% endfor %}
+      </ol>
+    </section>
+  </aside>
+</div>
+{% include "partials/paginacion.html" %}
+{% endblock %}

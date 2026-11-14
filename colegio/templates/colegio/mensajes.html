@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Mensajes{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><span>Mensajes</span>{% endblock %}
+{% block antetitulo %}Comunicación interna{% endblock %}
+{% block h1 %}Mensajes{% endblock %}
+{% block contenido %}
+<p class="nota">Mensajería entre Dirección, psicólogas y docentes. Cada conversación la ven sus participantes y Dirección.</p>
+<div class="barra-acciones"><a class="boton" href="{% url 'mensaje_nuevo' %}">Nuevo mensaje</a></div>
+
+<nav class="pestanas" aria-label="Filtrar mensajes">
+  <a href="?ver=todos"{% if vista == "todos" %} aria-current="page"{% endif %}>Todos</a>
+  <a href="?ver=sin_leer"{% if vista == "sin_leer" %} aria-current="page"{% endif %}>Sin leer{% if n_mensajes %} ({{ n_mensajes }}){% endif %}</a>
+  <a href="?ver=recibidos"{% if vista == "recibidos" %} aria-current="page"{% endif %}>Recibidos</a>
+  <a href="?ver=enviados"{% if vista == "enviados" %} aria-current="page"{% endif %}>Enviados</a>
+  {% if user.es_direccion %}<a href="?ver=todas"{% if vista == "todas" %} aria-current="page"{% endif %}>Todas las conversaciones</a>{% endif %}
+</nav>
+<form method="get" class="filtros">
+  <input type="hidden" name="ver" value="{{ vista }}">
+  <label class="filtros__campo filtros__campo--ancho"><span>Buscar</span><input name="q" value="{{ q }}" placeholder="Asunto, texto o estudiante"></label>
+  <div class="filtros__acciones"><button class="boton boton--chico" type="submit">Buscar</button>{% if q %}<a class="enlace" href="?ver={{ vista }}">Limpiar</a>{% endif %}</div>
+</form>
+
+<section class="tarjeta tarjeta--sin-relleno">
+  <ul class="bandeja">
+  {% for c in pagina %}
+    <li class="bandeja__fila{% if c.sin_leer %} bandeja__fila--nueva{% endif %}">
+      <a href="{% url 'conversacion' c.pk %}">
+        <span class="bandeja__inicial" aria-hidden="true">{{ c.creado_por.nombre|slice:":1"|default:"?" }}</span>
+        <span class="bandeja__texto">
+          <span class="bandeja__asunto">{{ c.asunto }}{% if c.sin_leer %} <span class="contador">{{ c.sin_leer }}</span>{% endif %}</span>
+          <span class="bandeja__resumen">{{ c.cuerpo|truncatechars:110 }}</span>
+          <span class="bandeja__meta">
+            {% if c.creado_por_id == user.pk %}Para: {% for d in c.destinatarios.all|slice:":3" %}{{ d.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if c.destinatarios.all|length > 3 %} y {{ c.destinatarios.all|length|add:"-3" }} más{% endif %}
+            {% else %}De: {{ c.creado_por.nombre|default:"—" }}{% endif %}
+            {% if c.alumno %} · <span class="chip">{{ c.alumno.nombre }}</span>{% endif %}
+            {% if vista == "todas" and c.creado_por_id != user.pk and user not in c.destinatarios.all %} · <span class="chip chip--reservado">No participa</span>{% endif %}
+          </span>
+        </span>
+        <time class="bandeja__fecha">{{ c.ultima|date:"d-m-Y H:i" }}</time>
+      </a>
+    </li>
+  {% empty %}
+    <li class="vacio" style="padding:1.2rem 1.8rem">No hay mensajes.</li>
+  {% endfor %}
+  </ul>
+</section>
+{% include "partials/paginacion.html" %}
+{% endblock %}

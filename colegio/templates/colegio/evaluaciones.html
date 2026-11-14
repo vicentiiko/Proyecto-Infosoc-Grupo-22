@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Evaluaciones{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><span>Evaluaciones</span>{% endblock %}
+{% block antetitulo %}Información reservada · Psicóloga y Dirección{% endblock %}
+{% block h1 %}Evaluaciones y reevaluaciones{% endblock %}
+{% block contenido %}
+<div class="indicadores">
+  <a class="indicador indicador--alerta" href="?estado=vencida"><span class="indicador__valor">{{ conteo.vencida }}</span><span class="indicador__nombre">Vencidas</span></a>
+  <a class="indicador indicador--aviso" href="?estado=proxima"><span class="indicador__valor">{{ conteo.proxima }}</span><span class="indicador__nombre">Próximas (60 días)</span></a>
+  <a class="indicador" href="?estado=al_dia"><span class="indicador__valor">{{ conteo.al_dia }}</span><span class="indicador__nombre">Al día</span></a>
+</div>
+<div class="barra-acciones">
+  {% if permisos.evaluaciones.editar %}<a class="boton" href="{% url 'evaluacion_nueva' %}">Registrar evaluación</a>{% endif %}
+  <a class="boton boton--secundario" href="{% url 'tipos_evaluacion' %}">Tipos y periodicidad</a>
+</div>
+{% include "partials/filtros.html" %}
+
+<section class="tarjeta tarjeta--sin-relleno">
+  <header class="tarjeta__cabecera"><h2>Próximas reevaluaciones</h2><span class="etiqueta">{{ estado_actual|length }}</span></header>
+  <p class="nota nota--relleno">Por cada estudiante y tipo se toma la última evaluación y se suma la periodicidad del tipo.</p>
+  {% if estado_actual %}
+  <div class="tabla-envoltura"><table class="tabla">
+    <thead><tr><th>Estudiante</th><th>Tipo</th><th>Última evaluación</th><th>Reevaluar el</th><th>Estado</th><th><span class="oculto">Acción</span></th></tr></thead>
+    <tbody>{% for e in estado_actual %}
+      <tr><td><a href="{% url 'ficha' e.alumno.pk %}">{{ e.alumno.nombre }}</a><br><span class="tenue">{{ e.alumno.curso|default:"" }}</span></td>
+        <td>{{ e.tipo }}</td><td>{{ e.fecha|date:"d-m-Y" }}</td><td><strong>{{ e.proxima_reevaluacion|date:"d-m-Y" }}</strong></td>
+        <td>{% include "colegio/_estado_eval.html" %}</td>
+        <td class="tabla__accion">{% if permisos.evaluaciones.editar and e.estado != "al_dia" %}<a href="{% url 'evaluacion_nueva' %}?alumno={{ e.alumno.pk }}">Registrar reevaluación</a>{% else %}<a href="{% url 'evaluacion' e.pk %}">Ver</a>{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="vacio">No hay evaluaciones para los filtros elegidos.</p>{% endif %}
+</section>
+
+<section class="tarjeta">
+  <h2>Últimas evaluaciones registradas</h2>
+  <ol class="linea-tiempo">
+  {% for e in recientes %}
+    <li><div class="linea-tiempo__meta"><time>{{ e.fecha|date:"j \d\e F \d\e Y" }}</time><span>{{ e.tipo }}</span><span>{{ e.creado_por.nombre|default:"—" }}</span></div>
+      <p><a href="{% url 'evaluacion' e.pk %}">{{ e.alumno.nombre }}</a> — {{ e.resultados|truncatewords:20 }}</p></li>
+  {% empty %}<li class="vacio">Sin evaluaciones.</li>{% endfor %}
+  </ol>
+</section>
+{% endblock %}

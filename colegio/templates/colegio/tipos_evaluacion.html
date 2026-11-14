@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Tipos de evaluación{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'evaluaciones' %}">Evaluaciones</a><span>Tipos</span>{% endblock %}
+{% block antetitulo %}Evaluaciones{% endblock %}
+{% block h1 %}Tipos y periodicidad{% endblock %}
+{% block contenido %}
+<div class="barra-acciones">{% if permisos.evaluaciones.editar %}<a class="boton" href="{% url 'tipo_evaluacion_nuevo' %}">Nuevo tipo</a>{% endif %}</div>
+<section class="tarjeta tarjeta--sin-relleno">
+  <p class="nota nota--relleno">La periodicidad define cada cuánto se reevalúa. Si la cambia, las fechas se recalculan solas.</p>
+  <div class="tabla-envoltura"><table class="tabla">
+    <thead><tr><th>Tipo</th><th>Periodicidad</th><th>Descripción</th><th><span class="oculto">Acción</span></th></tr></thead>
+    <tbody>{% for t in tipos %}
+      <tr><td><strong>{{ t.nombre }}</strong></td><td>Cada {{ t.periodicidad_meses }} mes{{ t.periodicidad_meses|pluralize:"es" }}</td><td>{{ t.descripcion|default:"—" }}</td>
+        <td class="tabla__accion">{% if permisos.evaluaciones.editar %}<a href="{% url 'tipo_evaluacion_editar' t.pk %}">Editar</a>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4" class="vacio">No hay tipos definidos.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}Citaciones{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><span>Citaciones</span>{% endblock %}
+{% block antetitulo %}Información reservada · Psicóloga y Dirección{% endblock %}
+{% block h1 %}Citaciones a apoderados{% endblock %}
+{% block contenido %}
+<p class="nota">El apoderado no entra al sistema: la citación se le comunica por correo o teléfono y aquí queda el registro de lo gestionado.</p>
+<div class="barra-acciones">{% if permisos.citaciones.editar %}<a class="boton" href="{% url 'citacion_nueva' %}">Nueva citación</a>{% endif %}</div>
+
+<section class="tarjeta">
+  <h2>Próximas</h2>
+  <ul class="cartas">
+  {% for c in proximas %}
+    <li class="carta"><div class="carta__meta"><time>{{ c.fecha|date:"l j \d\e F" }}{% if c.hora %} · {{ c.hora|time:"H:i" }}{% endif %}</time>{% include "colegio/_estado_citacion.html" %}<span>{{ c.apoderado|default:"Apoderado sin indicar" }}</span>
+      {% if permisos.citaciones.editar %}<span class="acciones-fila"><a href="{% url 'citacion_editar' c.pk %}">Actualizar</a></span>{% endif %}</div>
+      <p><a href="{% url 'ficha' c.alumno.pk %}">{{ c.alumno.nombre }}</a> ({{ c.alumno.curso|default:"sin curso" }}) — {{ c.motivo }}</p></li>
+  {% empty %}<li class="vacio">No hay citaciones programadas.</li>{% endfor %}
+  </ul>
+</section>
+
+<h2 class="titulo-suelto">Historial</h2>
+{% include "partials/filtros.html" %}
+<section class="tarjeta tarjeta--sin-relleno">
+  {% if pagina %}
+  <div class="tabla-envoltura"><table class="tabla">
+    <thead><tr><th>Fecha</th><th>Estudiante</th><th>Apoderado</th><th>Motivo</th><th>Estado</th><th><span class="oculto">Acción</span></th></tr></thead>
+    <tbody>{% for c in pagina %}
+      <tr><td>{{ c.fecha|date:"d-m-Y" }}{% if c.hora %}<br><span class="tenue">{{ c.hora|time:"H:i" }}</span>{% endif %}</td>
+        <td><a href="{% url 'ficha' c.alumno.pk %}">{{ c.alumno.nombre }}</a></td><td>{{ c.apoderado|default:"—" }}</td>
+        <td>{{ c.motivo }}{% if c.resultado %}<br><span class="tenue">{{ c.resultado|truncatewords:15 }}</span>{% endif %}<br>{% include "partials/traza.html" with r=c %}</td>
+        <td>{% include "colegio/_estado_citacion.html" %}</td>
+        <td class="tabla__accion">{% if permisos.citaciones.editar %}<a href="{% url 'citacion_editar' c.pk %}">Actualizar</a>{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="vacio">No hay citaciones para los filtros elegidos.</p>{% endif %}
+</section>
+{% include "partials/paginacion.html" %}
+{% endblock %}

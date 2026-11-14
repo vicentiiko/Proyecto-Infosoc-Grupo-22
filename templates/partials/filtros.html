@@ -1,0 +1,9 @@
+<form method="get" class="filtros">
+  {% for field in filtro %}
+    <label class="filtros__campo"><span>{{ field.label }}</span>{{ field }}</label>
+  {% endfor %}
+  <div class="filtros__acciones">
+    <button class="boton boton--chico" type="submit">Filtrar</button>
+    {% if request.GET %}<a class="enlace" href="{{ request.path }}">Limpiar</a>{% endif %}
+  </div>
+</form>

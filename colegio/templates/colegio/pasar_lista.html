@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block titulo %}Pasar lista{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'inasistencias' %}">Asistencia</a><span>Pasar lista</span>{% endblock %}
+{% block antetitulo %}Asistencia{% endblock %}
+{% block h1 %}Pasar lista{% endblock %}
+{% block contenido %}
+{% include "partials/subnav_asistencia.html" %}
+{% if not curso %}
+  <section class="tarjeta tarjeta--centrada"><p>No tiene cursos asignados. Dirección puede asignárselos.</p></section>
+{% else %}
+<form method="get" class="filtros">
+  <label class="filtros__campo"><span>Curso</span>{{ selector.curso }}</label>
+  <label class="filtros__campo"><span>Fecha</span>{{ selector.fecha }}</label>
+  <div class="filtros__acciones"><button class="boton boton--chico" type="submit">Cambiar</button></div>
+</form>
+
+<form method="post" class="tarjeta tarjeta--sin-relleno" id="lista">{% csrf_token %}
+  <input type="hidden" name="curso" value="{{ curso.pk }}">
+  <input type="hidden" name="fecha" value="{{ fecha|date:'Y-m-d' }}">
+  <header class="tarjeta__cabecera"><h2>{{ curso }} · {{ fecha|date:"l j \d\e F" }}</h2>
+    <span class="grupo-botones">
+      <button type="button" class="boton boton--chico boton--secundario" data-todos="presente">Todos presentes</button>
+    </span>
+  </header>
+  <div class="resumen-lista" aria-live="polite">
+    <span class="chip chip--ok"><strong data-cuenta="presente">0</strong> presentes</span>
+    <span class="chip chip--alerta"><strong data-cuenta="ausente">0</strong> ausentes</span>
+    <span class="chip chip--aviso"><strong data-cuenta="justificada">0</strong> justificadas</span>
+  </div>
+  <div class="tabla-envoltura"><table class="tabla">
+    <thead><tr><th>N°</th><th>Estudiante</th><th>Asistencia</th></tr></thead>
+    <tbody>{% for a, ina in filas %}
+      <tr><td class="tabla__num">{{ forloop.counter }}</td><td><strong>{{ a.nombre }}</strong></td>
+        <td>
+          <fieldset class="asistencia-opciones">
+            <legend class="oculto">Asistencia de {{ a.nombre }}</legend>
+            <label class="asistencia-opciones__op asistencia-opciones__op--presente"><input type="radio" name="estado_{{ a.pk }}" value="presente"{% if not ina %} checked{% endif %}><span>Presente</span></label>
+            <label class="asistencia-opciones__op asistencia-opciones__op--ausente"><input type="radio" name="estado_{{ a.pk }}" value="ausente"{% if ina and not ina.justificada %} checked{% endif %}><span>Ausente</span></label>
+            <label class="asistencia-opciones__op asistencia-opciones__op--justificada"><input type="radio" name="estado_{{ a.pk }}" value="justificada"{% if ina.justificada %} checked{% endif %}><span>Justificada</span></label>
+          </fieldset>
+        </td></tr>
+    {% empty %}<tr><td colspan="3" class="vacio">El curso no tiene estudiantes activos.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <div class="acciones acciones--relleno"><button class="boton" type="submit">Guardar asistencia</button></div>
+</form>
+<script>
+  (function () {
+    var lista = document.getElementById("lista");
+    function contar() {
+      ["presente", "ausente", "justificada"].forEach(function (e) {
+        lista.querySelector('[data-cuenta="' + e + '"]').textContent =
+          lista.querySelectorAll('input[type="radio"][value="' + e + '"]:checked').length;
+      });
+    }
+    lista.addEventListener("change", contar);
+    lista.querySelector('[data-todos="presente"]').addEventListener("click", function () {
+      lista.querySelectorAll('input[type="radio"][value="presente"]').forEach(function (r) { r.checked = true; });
+      contar();
+    });
+    contar();
+  })();
+</script>
+{% endif %}
+{% endblock %}

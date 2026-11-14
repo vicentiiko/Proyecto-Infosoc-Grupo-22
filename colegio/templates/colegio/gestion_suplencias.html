@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Reemplazos{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><span>Gestión</span>{% endblock %}
+{% block antetitulo %}Gestión · Dirección{% endblock %}
+{% block h1 %}Historial de reemplazos{% endblock %}
+{% block contenido %}
+{% include "partials/subnav_gestion.html" %}
+<p class="nota">Cada vez que alguien de Dirección trabaja en la cuenta de otra persona queda registrado aquí. Para iniciar un reemplazo, vaya a <a href="{% url 'usuarios' %}">Usuarios</a> y use «Reemplazar».</p>
+<section class="tarjeta tarjeta--sin-relleno">
+  <div class="tabla-envoltura"><table class="tabla">
+    <thead><tr><th>Reemplazado(a)</th><th>Por</th><th>Inicio</th><th>Término</th></tr></thead>
+    <tbody>{% for s in pagina %}
+      <tr><td><strong>{{ s.usuario.nombre }}</strong><br><span class="tenue">{{ s.usuario.get_rol_display }}</span></td>
+        <td>{{ s.direccion.nombre }}</td>
+        <td>{{ s.inicio|date:"d-m-Y H:i" }}</td>
+        <td>{% if s.fin %}{{ s.fin|date:"d-m-Y H:i" }}{% else %}<span class="chip chip--aviso">En curso</span>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4" class="vacio">Aún no hay reemplazos.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% include "partials/paginacion.html" %}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}{% if obj %}Editar pupilo{% else %}Nuevo pupilo{% endif %}{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'pupilos' %}">Pupilos</a><span>{% if obj %}{{ obj.nombre }}{% else %}Nuevo{% endif %}</span>{% endblock %}
+{% block antetitulo %}Gestión de pupilos{% endblock %}
+{% block h1 %}{% if obj %}{{ obj.nombre }}{% else %}Nuevo pupilo{% endif %}{% endblock %}
+{% block contenido %}
+<form method="post" class="formulario" novalidate>{% csrf_token %}
+  <section class="tarjeta formulario">
+    <h2>Datos del estudiante</h2>
+    {% if form.non_field_errors %}<div class="aviso aviso--error" role="alert">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>{% endif %}
+    <div class="rejilla-campos">{% for field in form %}{% include "partials/campo.html" %}{% endfor %}</div>
+  </section>
+
+  <section class="tarjeta formulario">
+    <h2>Apoderados</h2>
+    <p class="nota">Solo como datos de contacto: los apoderados no tienen acceso al sistema. Para quitar uno, marque «Quitar». Para agregar otro después de guardar, vuelva a editar.</p>
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<div class="aviso aviso--error">{{ formset.non_form_errors }}</div>{% endif %}
+    {% for f in formset %}
+      <fieldset class="apoderado-form">
+        <legend>{% if f.initial %}Apoderado {{ forloop.counter }}{% else %}Agregar apoderado{% endif %}</legend>
+        <div class="rejilla-campos">
+          {% for field in f %}{% if field.name != "DELETE" %}{% include "partials/campo.html" %}{% endif %}{% endfor %}
+          {% if f.initial %}<div class="campo campo--casilla"><label class="casilla">{{ f.DELETE }}<span>Quitar</span></label></div>{% endif %}
+        </div>
+      </fieldset>
+    {% endfor %}
+  </section>
+
+  <div class="acciones">
+    <a class="boton boton--secundario" href="{% url 'pupilos' %}">Cancelar</a>
+    <button class="boton" type="submit">Guardar pupilo</button>
+  </div>
+</form>
+{% endblock %}

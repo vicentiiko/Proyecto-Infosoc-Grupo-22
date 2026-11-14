@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}{{ c.nombre }}{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'comisiones' %}">Comisiones</a><span>{{ c.nombre }}</span>{% endblock %}
+{% block antetitulo %}Comisión{% if not c.activa %} · inactiva{% endif %}{% endblock %}
+{% block h1 %}{{ c.nombre }}{% endblock %}
+{% block contenido %}
+<div class="dos-columnas">
+  <div>
+    <form method="post" enctype="multipart/form-data" class="tarjeta tarjeta--destacada formulario">{% csrf_token %}
+      <h2>Compartir con la comisión</h2>
+      {% if form.non_field_errors %}<div class="aviso aviso--error" role="alert">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>{% endif %}
+      {% for field in form %}{% include "partials/campo.html" %}{% endfor %}
+      <div class="acciones"><button class="boton" type="submit">Publicar</button></div>
+    </form>
+    <section class="tarjeta">
+      <h2>Notas y documentos</h2>
+      <ol class="linea-tiempo">
+      {% for p in publicaciones %}
+        <li><div class="linea-tiempo__meta"><time>{{ p.creado_en|date:"j \d\e F \d\e Y, H:i" }}</time><span>{{ p.creado_por.nombre|default:"—" }}</span>
+          {% if p.creado_por_id == user.pk or user.es_direccion %}<span class="acciones-fila"><a href="{% url 'publicacion_eliminar' p.pk %}">Eliminar</a></span>{% endif %}</div>
+          {% if p.texto %}<p>{{ p.texto|linebreaksbr }}</p>{% endif %}
+          {% if p.archivo %}<a class="archivo" href="{% url 'publicacion_descargar' p.pk %}">{{ p.nombre_archivo }}</a>{% endif %}</li>
+      {% empty %}<li class="vacio">Todavía no hay publicaciones.</li>{% endfor %}
+      </ol>
+    </section>
+  </div>
+  <aside>
+    <section class="tarjeta">
+      <header class="tarjeta__titulo"><h2>Integrantes</h2>{% if permisos.comisiones.editar %}<a class="enlace" href="{% url 'comision_editar' c.pk %}">Editar</a>{% endif %}</header>
+      {% if c.descripcion %}<p>{{ c.descripcion|linebreaksbr }}</p>{% endif %}
+      <ul class="lista-simple">
+      {% for u in integrantes %}<li><strong>{{ u.nombre }}</strong><span class="tenue">{{ u.get_rol_display }}{% if u.asignatura %} · {{ u.asignatura }}{% endif %}</span></li>
+      {% empty %}<li class="vacio">Sin integrantes.</li>{% endfor %}
+      </ul>
+    </section>
+  </aside>
+</div>
+{% endblock %}

@@ -46,6 +46,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'colegio.suplencia.SuplenciaMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -62,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'colegio.context_processors.portal',
             ],
         },
     },
@@ -133,3 +135,9 @@ LOGIN_REDIRECT_URL = 'inicio'
 LOGOUT_REDIRECT_URL = 'login'
 
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Archivos subidos (recursos, comunicaciones, comisiones).
+# No se publican con una URL directa: se descargan a través de vistas que revisan permisos.
+MEDIA_ROOT = BASE_DIR / 'media'
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024

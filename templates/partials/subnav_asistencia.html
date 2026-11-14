@@ -1,0 +1,5 @@
+<nav class="pestanas" aria-label="Asistencia">
+  <a href="{% url 'inasistencias' %}"{% if request.resolver_match.url_name == 'inasistencias' %} aria-current="page"{% endif %}>Inasistencias</a>
+  <a href="{% url 'atrasos' %}"{% if request.resolver_match.url_name == 'atrasos' %} aria-current="page"{% endif %}>Atrasos</a>
+  {% if permisos.asistencia.editar %}<a href="{% url 'pasar_lista' %}"{% if request.resolver_match.url_name == 'pasar_lista' %} aria-current="page"{% endif %}>Pasar lista</a>{% endif %}
+</nav>

@@ -12,6 +12,14 @@
 </head>
 <body class="{% block clase_body %}{% endblock %}">
 {% block pagina %}
+  {% if suplencia %}
+  <div class="reemplazo" role="status">
+    <div class="contenedor reemplazo__fila">
+      <p><strong>Modo reemplazo:</strong> {{ suplencia.nombre }} está trabajando en la cuenta de <strong>{{ user.nombre }}</strong> ({{ user.get_rol_display }}). Lo que registre quedará a nombre de {{ user.nombre }}, indicando que lo hizo {{ suplencia.nombre }}.</p>
+      <form method="post" action="{% url 'volver_a_mi_cuenta' %}">{% csrf_token %}<button class="boton boton--chico boton--claro" type="submit">Volver a mi cuenta</button></form>
+    </div>
+  </div>
+  {% endif %}
   <div class="franja">
     <div class="contenedor franja__fila">
       <span>Portal Institucional</span>
@@ -25,37 +33,54 @@
         {% include "partials/escudo.html" with clase="escudo--cabecera" %}
         <span class="marca__texto">
           <span class="marca__nombre">Escuela Especial Diversidad</span>
-          <span class="marca__lema">Portal de Comunicación Escolar</span>
+          <span class="marca__lema">Plataforma de Gestión Escolar</span>
         </span>
       </a>
 
       {% if user.is_authenticated %}
-      <nav class="menu" aria-label="Menú principal">
-        {% if user.es_profesor %}
-          <a href="{% url 'profesor_panel' %}">Mis cursos</a>
-          <a href="{% url 'mensaje_nuevo' %}">Nuevo mensaje</a>
-        {% elif user.es_apoderado %}
-          <a href="{% url 'apoderado_panel' %}">Mis pupilos</a>
-        {% endif %}
-        <div class="usuario">
-          <span class="usuario__inicial" aria-hidden="true">{{ user.nombre|slice:":1" }}</span>
-          <span class="usuario__datos">
-            <span class="usuario__nombre">{{ user.nombre }}</span>
-            <span class="usuario__rol">{% if user.es_profesor %}Profesor(a){% elif user.es_apoderado %}Apoderado(a){% else %}Usuario{% endif %}</span>
-          </span>
-          <form method="post" action="{% url 'logout' %}">{% csrf_token %}
-            <button class="boton-salir" type="submit">Cerrar sesión</button>
-          </form>
-        </div>
-      </nav>
+      <div class="usuario">
+        <span class="usuario__inicial" aria-hidden="true">{{ user.nombre|slice:":1" }}</span>
+        <span class="usuario__datos">
+          <span class="usuario__nombre">{{ user.nombre }}</span>
+          <span class="usuario__rol">{{ user.get_rol_display }}</span>
+        </span>
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+          <button class="boton-salir" type="submit">Cerrar sesión</button>
+        </form>
+      </div>
       {% endif %}
     </div>
+
+    {% if user.is_authenticated %}
+    {% with p=request.path %}
+    <nav class="menu" aria-label="Menú principal">
+      <div class="contenedor menu__fila">
+        <a href="{% url 'inicio' %}"{% if p == "/" %} aria-current="page"{% endif %}>Inicio</a>
+        <a href="{% url 'estudiantes' %}"{% if "/gestion/" not in p %}{% if "/estudiantes/" in p or "/cursos/" in p or "/observaciones/" in p or "/seguimiento/" in p %} aria-current="page"{% endif %}{% endif %}>Estudiantes</a>
+        <a href="{% url 'inasistencias' %}"{% if "/asistencia/" in p %} aria-current="page"{% endif %}>Asistencia</a>
+        {% if permisos.evaluaciones.ver %}
+          <a href="{% url 'evaluaciones' %}"{% if "/evaluaciones/" in p %} aria-current="page"{% endif %}>Evaluaciones{% if n_reevaluaciones %} <span class="contador" title="Reevaluaciones próximas o vencidas">{{ n_reevaluaciones }}</span>{% endif %}</a>
+        {% endif %}
+        {% if permisos.citaciones.ver %}
+          <a href="{% url 'citaciones' %}"{% if "/citaciones/" in p %} aria-current="page"{% endif %}>Citaciones</a>
+        {% endif %}
+        <a href="{% url 'mensajes' %}"{% if "/mensajes/" in p %} aria-current="page"{% endif %}>Mensajes{% if n_mensajes %} <span class="contador" title="Mensajes sin leer">{{ n_mensajes }}</span>{% endif %}</a>
+        <a href="{% url 'recursos' %}"{% if "/recursos/" in p %} aria-current="page"{% endif %}>Recursos</a>
+        <a href="{% url 'comisiones' %}"{% if "/comisiones/" in p %} aria-current="page"{% endif %}>Comisiones</a>
+        <a href="{% url 'avisos' %}"{% if "/avisos/" in p %} aria-current="page"{% endif %}>Avisos</a>
+        {% if permisos.gestion.ver %}
+          <a href="{% url 'usuarios' %}"{% if "/gestion/" in p %} aria-current="page"{% endif %}>Gestión</a>
+        {% endif %}
+      </div>
+    </nav>
+    {% endwith %}
+    {% endif %}
   </header>
 
   {% block portada %}
   <section class="portada">
     <div class="contenedor">
-      <nav class="migas" aria-label="Ruta">{% block migas %}{% endblock %}</nav>
+      <nav class="migas" aria-label="Ruta">{% block migas %}{% if migas %}<a href="{% url 'inicio' %}">Inicio</a>{% for texto, url in migas %}{% if url %}<a href="{{ url }}">{{ texto }}</a>{% else %}<span>{{ texto }}</span>{% endif %}{% endfor %}{% endif %}{% endblock %}</nav>
       <p class="antetitulo">{% block antetitulo %}{% endblock %}</p>
       <h1>{% block h1 %}{% endblock %}</h1>
       <div class="filete" aria-hidden="true"><span class="figuras"><i class="fig fig--cuadrado"></i><i class="fig fig--triangulo"></i><i class="fig fig--rombo"></i><i class="fig fig--circulo"></i></span></div>
@@ -63,7 +88,14 @@
   </section>
   {% endblock %}
 
-  <main class="contenedor principal">{% block contenido %}{% endblock %}</main>
+  <main class="contenedor principal">
+    {% if messages %}
+      <div class="mensajes">
+        {% for m in messages %}<div class="aviso aviso--{% if m.tags == 'error' %}error{% else %}exito{% endif %}" role="status">{{ m }}</div>{% endfor %}
+      </div>
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </main>
 
   <footer class="pie">
     <div class="contenedor pie__fila">
@@ -71,12 +103,36 @@
         {% include "partials/escudo.html" with clase="escudo--pie" %}
         <div>
           <strong>Escuela Especial Diversidad</strong>
-          <p>Portal de comunicación entre profesores y apoderados.</p>
+          <p>Plataforma interna de gestión y seguimiento de estudiantes.</p>
         </div>
       </div>
       <p class="pie__legal">© {% now "Y" %} Escuela Especial Diversidad · Proyecto Infosoc, Grupo 22</p>
     </div>
   </footer>
 {% endblock %}
+<script>
+  // Buscador para listas largas de casillas (estudiantes, personas, destinatarios…)
+  (function () {
+    function normalizar(t) { return t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+    document.querySelectorAll("[data-buscar]").forEach(function (entrada) {
+      var campo = entrada.closest(".campo");
+      var caja = campo.querySelector(".opciones");
+      var conteo = campo.querySelector(".buscador__conteo");
+      function contar() {
+        var n = caja.querySelectorAll("input:checked").length;
+        conteo.textContent = n + (n === 1 ? " seleccionado" : " seleccionados");
+      }
+      entrada.addEventListener("input", function () {
+        var t = normalizar(entrada.value.trim());
+        caja.querySelectorAll(".opcion").forEach(function (op) {
+          op.hidden = t !== "" && normalizar(op.textContent).indexOf(t) === -1;
+        });
+      });
+      entrada.addEventListener("keydown", function (e) { if (e.key === "Enter") e.preventDefault(); });
+      caja.addEventListener("change", contar);
+      contar();
+    });
+  })();
+</script>
 </body>
 </html>

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+{% block antetitulo %}{{ user.get_rol_display }}{% endblock %}
+{% block h1 %}Bienvenido(a), {{ user.nombre }}{% endblock %}
+{% block contenido %}
+<div class="indicadores">
+  {% for valor, nombre, tono in indicadores %}
+  <div class="indicador{% if tono %} indicador--{{ tono }}{% endif %}"><span class="indicador__valor">{{ valor }}</span><span class="indicador__nombre">{{ nombre }}</span></div>
+  {% endfor %}
+</div>
+
+<div class="dos-columnas">
+  <div>
+    {% if reevaluaciones is not None %}
+    <section class="seccion">
+      <header class="seccion__titulo"><h2>Reevaluaciones por atender</h2><a class="enlace" href="{% url 'evaluaciones' %}">Ver todas</a></header>
+      <div class="tarjeta tarjeta--sin-relleno">
+      {% if reevaluaciones %}
+        <div class="tabla-envoltura"><table class="tabla">
+          <thead><tr><th>Estudiante</th><th>Evaluación</th><th>Reevaluar el</th><th>Estado</th></tr></thead>
+          <tbody>{% for e in reevaluaciones %}
+            <tr><td><a href="{% url 'ficha' e.alumno.pk %}">{{ e.alumno.nombre }}</a><br><span class="tenue">{{ e.alumno.curso|default:"Sin curso" }}</span></td>
+              <td>{{ e.tipo }}</td><td>{{ e.proxima_reevaluacion|date:"d-m-Y" }}</td>
+              <td>{% include "colegio/_estado_eval.html" %}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+      {% else %}<p class="vacio">No hay reevaluaciones vencidas ni próximas. </p>{% endif %}
+      </div>
+    </section>
+
+    <section class="seccion">
+      <header class="seccion__titulo"><h2>Próximas citaciones</h2><a class="enlace" href="{% url 'citaciones' %}">Ver todas</a></header>
+      <div class="tarjeta">
+        <ul class="cartas">
+        {% for c in citaciones %}
+          <li class="carta"><div class="carta__meta"><time>{{ c.fecha|date:"l j \d\e F" }}{% if c.hora %} · {{ c.hora|time:"H:i" }}{% endif %}</time><span>{{ c.apoderado|default:"Apoderado sin indicar" }}</span></div>
+            <p><a href="{% url 'ficha' c.alumno.pk %}">{{ c.alumno.nombre }}</a> — {{ c.motivo }}</p></li>
+        {% empty %}<li class="vacio">No hay citaciones programadas.</li>{% endfor %}
+        </ul>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if cursos is not None %}
+    <section class="seccion">
+      <header class="seccion__titulo"><h2>Mis cursos</h2></header>
+      <div class="rejilla">
+      {% for c in cursos %}
+        <a class="curso" href="{% url 'curso' c.pk %}">
+          <span class="curso__nivel">{{ c.nivel }}</span>
+          <span class="curso__alumnos">{{ c.n }} estudiante{{ c.n|pluralize }}</span>
+          <span class="curso__ir">Ver curso →</span>
+        </a>
+      {% empty %}<p class="vacio">Aún no tiene cursos asignados. Dirección puede asignárselos.</p>{% endfor %}
+      </div>
+    </section>
+    <section class="seccion">
+      <header class="seccion__titulo"><h2>Accesos rápidos</h2></header>
+      <div class="accesos">
+        <a class="acceso" href="{% url 'pasar_lista' %}"><strong>Pasar lista</strong><span>Inasistencias del día por curso</span></a>
+        <a class="acceso" href="{% url 'atraso_nuevo' %}"><strong>Registrar atraso</strong><span>Con fecha y hora de llegada</span></a>
+        <a class="acceso" href="{% url 'observacion_nueva' %}"><strong>Nueva observación</strong><span>En el historial del estudiante</span></a>
+        <a class="acceso" href="{% url 'recurso_nuevo' %}"><strong>Subir recurso</strong><span>Elija quién puede verlo</span></a>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+
+  <aside>
+    <section class="tarjeta">
+      <header class="tarjeta__titulo"><h2>Mensajes sin leer</h2><a class="enlace" href="{% url 'mensaje_nuevo' %}">Escribir</a></header>
+      <ul class="lista-simple">
+      {% for c in mensajes_pendientes %}
+        <li><a href="{% url 'conversacion' c.pk %}"><strong>{{ c.asunto }}</strong></a> <span class="contador">{{ c.sin_leer }}</span><span class="tenue">{{ c.creado_por.nombre|default:"—" }}</span></li>
+      {% empty %}<li class="vacio">No tiene mensajes sin leer.</li>{% endfor %}
+      </ul>
+      <p><a class="volver" href="{% url 'mensajes' %}">Ir a mensajes →</a></p>
+    </section>
+    <section class="tarjeta tarjeta--destacada">
+      <header class="tarjeta__titulo"><h2>Avisos del colegio</h2>{% if permisos.avisos.editar %}<a class="enlace" href="{% url 'aviso_nuevo' %}">Publicar</a>{% endif %}</header>
+      <ul class="cartas">
+      {% for a in avisos %}
+        <li class="carta{% if a.destacado %} carta--destacada{% endif %}">
+          <div class="carta__meta"><time>{{ a.fecha|date:"j \d\e F \d\e Y" }}</time>{% if a.destacado %}<span class="chip chip--aviso">Destacado</span>{% endif %}</div>
+          <h3 class="carta__titulo">{{ a.titulo }}</h3>
+          <p>{{ a.contenido|truncatewords:40|linebreaksbr }}</p>
+        </li>
+      {% empty %}<li class="vacio">No hay avisos publicados.</li>{% endfor %}
+      </ul>
+      <p><a class="volver" href="{% url 'avisos' %}">Ver todos los avisos →</a></p>
+    </section>
+  </aside>
+</div>
+{% endblock %}

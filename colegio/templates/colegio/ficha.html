@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block titulo %}{{ alumno.nombre }}{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'estudiantes' %}">Estudiantes</a>{% if alumno.curso %}<a href="{% url 'curso' alumno.curso.pk %}">{{ alumno.curso }}</a>{% endif %}<span>{{ alumno.nombre }}</span>{% endblock %}
+{% block antetitulo %}Ficha del estudiante{% endblock %}
+{% block h1 %}{{ alumno.nombre }}{% endblock %}
+{% block contenido %}
+<section class="ficha">
+  <span class="ficha__inicial" aria-hidden="true">{{ alumno.nombre|slice:":1" }}</span>
+  <dl class="ficha__datos">
+    <div><dt>RUT</dt><dd>{{ alumno.rut }}</dd></div>
+    <div><dt>Curso</dt><dd>{{ alumno.curso|default:"Sin curso" }}</dd></div>
+    <div><dt>Nacimiento</dt><dd>{{ alumno.fecha_nacimiento|date:"d-m-Y"|default:"—" }}</dd></div>
+    <div><dt>Estado</dt><dd>{% if alumno.activo %}Activo{% else %}De baja desde {{ alumno.fecha_baja|date:"d-m-Y" }}{% endif %}</dd></div>
+  </dl>
+</section>
+
+<nav class="secciones" aria-label="Secciones de la ficha">
+  <a href="#apoderados">Apoderados</a>
+  <a href="#observaciones">Observaciones</a>
+  <a href="#asistencia">Asistencia</a>
+  {% if evaluaciones is not None %}<a href="#evaluaciones">Evaluaciones</a>{% endif %}
+  {% if citaciones is not None %}<a href="#citaciones">Citaciones</a>{% endif %}
+  <a href="#mensajes">Mensajes</a>
+  <a href="#seguimiento">Seguimiento</a>
+</nav>
+
+{# ---------- Apoderados ---------- #}
+<section class="tarjeta" id="apoderados">
+  <header class="tarjeta__titulo"><h2>Apoderados (contacto)</h2>{% if permisos.gestion.editar %}<a class="enlace" href="{% url 'pupilo_editar' alumno.pk %}">Editar datos</a>{% endif %}</header>
+  <p class="nota">Los apoderados no ingresan a la plataforma. Estos datos sirven para contactarlos por los medios habituales.</p>
+  <div class="contactos">
+  {% for v in vinculos %}
+    <div class="contacto">
+      <strong>{{ v.apoderado.nombre }}</strong>{% if v.es_principal %} <span class="chip chip--ok">Principal</span>{% endif %}
+      <span class="tenue">{{ v.parentesco }} · RUT {{ v.apoderado.rut }}</span>
+      {% if v.apoderado.telefono %}<span>Tel.: <a href="tel:{{ v.apoderado.telefono }}">{{ v.apoderado.telefono }}</a></span>{% endif %}
+      {% if v.apoderado.email %}<span>Correo: <a href="mailto:{{ v.apoderado.email }}">{{ v.apoderado.email }}</a></span>{% endif %}
+    </div>
+  {% empty %}<p class="vacio">Sin apoderados registrados.</p>{% endfor %}
+  </div>
+</section>
+
+{# ---------- Observaciones (M-04) ---------- #}
+<section class="tarjeta" id="observaciones">
+  <header class="tarjeta__titulo"><h2>Observaciones</h2>{% if permisos.observaciones.editar %}<a class="boton boton--chico" href="{% url 'observacion_nueva' %}?alumno={{ alumno.pk }}">Agregar</a>{% endif %}</header>
+  <ol class="linea-tiempo">
+  {% for o in observaciones %}
+    <li>
+      <div class="linea-tiempo__meta"><time>{{ o.fecha|date:"j \d\e F \d\e Y" }}</time><span>{{ o.creado_por.nombre|default:"—" }} · {{ o.creado_por.get_rol_display }}</span>
+        {% if o.creado_por_id == user.pk or user.es_direccion %}<span class="acciones-fila"><a href="{% url 'observacion_editar' o.pk %}">Editar</a><a href="{% url 'observacion_eliminar' o.pk %}">Eliminar</a></span>{% endif %}</div>
+      <p>{{ o.contenido|linebreaksbr }}</p>
+      {% include "partials/traza.html" with r=o %}
+    </li>
+  {% empty %}<li class="vacio">Aún no hay observaciones.</li>{% endfor %}
+  </ol>
+</section>
+
+{# ---------- Asistencia (M-02, M-03) ---------- #}
+<section class="tarjeta" id="asistencia">
+  <header class="tarjeta__titulo"><h2>Asistencia</h2>
+    {% if permisos.asistencia.editar %}<span class="grupo-botones">
+      <a class="boton boton--chico" href="{% url 'inasistencia_nueva' %}?alumno={{ alumno.pk }}&desde=ficha">Inasistencia</a>
+      <a class="boton boton--chico boton--secundario" href="{% url 'atraso_nuevo' %}?alumno={{ alumno.pk }}&desde=ficha">Atraso</a></span>{% endif %}
+  </header>
+  <div class="mini-indicadores">
+    <div><strong>{{ n_inasist }}</strong><span>Inasistencias</span></div>
+    <div><strong>{{ n_justificadas }}</strong><span>Justificadas</span></div>
+    <div><strong>{{ n_atrasos }}</strong><span>Atrasos</span></div>
+  </div>
+  <div class="dos-columnas dos-columnas--iguales">
+    <div>
+      <h3>Inasistencias recientes</h3>
+      <ul class="lista-simple">
+      {% for i in inasistencias %}<li><span>{{ i.fecha|date:"d-m-Y" }} {% if i.justificada %}<span class="chip chip--ok">Justificada</span>{% else %}<span class="chip chip--alerta">No justificada</span>{% endif %}</span>
+        {% if i.motivo %}<span class="tenue">{{ i.motivo }}</span>{% endif %}
+        {% if permisos.asistencia.editar %}<span class="acciones-fila"><a href="{% url 'inasistencia_editar' i.pk %}">Editar</a></span>{% endif %}</li>
+      {% empty %}<li class="vacio">Sin inasistencias.</li>{% endfor %}
+      </ul>
+      {% if n_inasist > 15 %}<a class="volver" href="{% url 'inasistencias' %}?q={{ alumno.rut }}">Ver historial completo →</a>{% endif %}
+    </div>
+    <div>
+      <h3>Atrasos recientes</h3>
+      <ul class="lista-simple">
+      {% for a in atrasos %}<li><span>{{ a.fecha|date:"d-m-Y" }} · llegó {{ a.hora_llegada|time:"H:i" }}</span>
+        {% if a.motivo %}<span class="tenue">{{ a.motivo }}</span>{% endif %}
+        {% if permisos.asistencia.editar %}<span class="acciones-fila"><a href="{% url 'atraso_editar' a.pk %}">Editar</a></span>{% endif %}</li>
+      {% empty %}<li class="vacio">Sin atrasos.</li>{% endfor %}
+      </ul>
+      {% if n_atrasos > 15 %}<a class="volver" href="{% url 'atrasos' %}?q={{ alumno.rut }}">Ver historial completo →</a>{% endif %}
+    </div>
+  </div>
+</section>
+
+{# ---------- Evaluaciones (M-05) — solo psicóloga y Dirección ---------- #}
+{% if evaluaciones is not None %}
+<section class="tarjeta tarjeta--reservada" id="evaluaciones">
+  <header class="tarjeta__titulo"><h2>Evaluaciones <span class="chip chip--reservado">Reservado</span></h2>{% if permisos.evaluaciones.editar %}<a class="boton boton--chico" href="{% url 'evaluacion_nueva' %}?alumno={{ alumno.pk }}">Registrar evaluación</a>{% endif %}</header>
+  {% if estado_evaluaciones %}
+  <div class="tabla-envoltura"><table class="tabla tabla--compacta">
+    <thead><tr><th>Tipo</th><th>Última evaluación</th><th>Próxima reevaluación</th><th>Estado</th></tr></thead>
+    <tbody>{% for e in estado_evaluaciones %}<tr><td>{{ e.tipo }}</td><td>{{ e.fecha|date:"d-m-Y" }}</td><td>{{ e.proxima_reevaluacion|date:"d-m-Y" }}</td><td>{% include "colegio/_estado_eval.html" %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% endif %}
+  <h3>Historial</h3>
+  <ol class="linea-tiempo">
+  {% for e in evaluaciones %}
+    <li><div class="linea-tiempo__meta"><time>{{ e.fecha|date:"j \d\e F \d\e Y" }}</time><span>{{ e.tipo }} · {{ e.creado_por.nombre|default:"—" }}</span>
+      <span class="acciones-fila"><a href="{% url 'evaluacion' e.pk %}">Ver</a>{% if permisos.evaluaciones.editar %}<a href="{% url 'evaluacion_editar' e.pk %}">Editar</a>{% endif %}</span></div>
+      <p>{{ e.resultados|truncatewords:30 }}</p>{% include "partials/traza.html" with r=e %}</li>
+  {% empty %}<li class="vacio">Sin evaluaciones registradas.</li>{% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+{# ---------- Citaciones (M-06) — solo psicóloga y Dirección ---------- #}
+{% if citaciones is not None %}
+<section class="tarjeta tarjeta--reservada" id="citaciones">
+  <header class="tarjeta__titulo"><h2>Citaciones a apoderados <span class="chip chip--reservado">Reservado</span></h2>{% if permisos.citaciones.editar %}<a class="boton boton--chico" href="{% url 'citacion_nueva' %}?alumno={{ alumno.pk }}">Nueva citación</a>{% endif %}</header>
+  <ol class="linea-tiempo">
+  {% for c in citaciones %}
+    <li><div class="linea-tiempo__meta"><time>{{ c.fecha|date:"j \d\e F \d\e Y" }}{% if c.hora %} · {{ c.hora|time:"H:i" }}{% endif %}</time>{% include "colegio/_estado_citacion.html" %}<span>{{ c.apoderado|default:"Apoderado sin indicar" }}</span>
+      {% if permisos.citaciones.editar %}<span class="acciones-fila"><a href="{% url 'citacion_editar' c.pk %}">Actualizar</a></span>{% endif %}</div>
+      <p><strong>{{ c.motivo }}</strong>{% if c.resultado %}<br>{{ c.resultado|linebreaksbr }}{% endif %}</p>
+      {% include "partials/traza.html" with r=c %}</li>
+  {% empty %}<li class="vacio">Sin citaciones registradas.</li>{% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+{# ---------- Mensajes internos sobre el estudiante ---------- #}
+<section class="tarjeta" id="mensajes">
+  <header class="tarjeta__titulo"><h2>Mensajes sobre este estudiante</h2><a class="boton boton--chico" href="{% url 'mensaje_nuevo' %}?alumno={{ alumno.pk }}">Nuevo mensaje</a></header>
+  <p class="nota">Conversaciones internas del equipo sobre este estudiante.{% if not user.es_direccion %} Solo aparecen aquellas en las que usted participa.{% endif %}</p>
+  <ul class="lista-simple">
+  {% for m in mensajes %}
+    <li><a href="{% url 'conversacion' m.pk %}"><strong>{{ m.asunto }}</strong></a><span class="tenue">{{ m.creado_por.nombre|default:"—" }} · {{ m.creado_en|date:"d-m-Y" }}</span></li>
+  {% empty %}<li class="vacio">No hay mensajes sobre este estudiante.</li>{% endfor %}
+  </ul>
+</section>
+
+{# ---------- Seguimiento integral (M-08) ---------- #}
+<section class="tarjeta" id="seguimiento">
+  <header class="tarjeta__titulo"><h2>Seguimiento integral</h2>{% if permisos.seguimiento.editar %}<a class="boton boton--chico" href="{% url 'seguimiento_nuevo' %}?alumno={{ alumno.pk }}">Agregar</a>{% endif %}</header>
+  <ol class="linea-tiempo">
+  {% for s in seguimientos %}
+    <li><div class="linea-tiempo__meta"><time>{{ s.fecha|date:"j \d\e F \d\e Y" }}</time><span class="chip">{{ s.get_tipo_display }}</span>{% if s.confidencial %}<span class="chip chip--reservado">Confidencial</span>{% endif %}<span>{{ s.creado_por.nombre|default:"—" }}</span>
+      {% if s.creado_por_id == user.pk or user.es_direccion %}<span class="acciones-fila"><a href="{% url 'seguimiento_editar' s.pk %}">Editar</a><a href="{% url 'seguimiento_eliminar' s.pk %}">Eliminar</a></span>{% endif %}</div>
+      <p><strong>{{ s.titulo }}</strong><br>{{ s.contenido|linebreaksbr }}</p>{% include "partials/traza.html" with r=s %}</li>
+  {% empty %}<li class="vacio">Sin registros de seguimiento.</li>{% endfor %}
+  </ol>
+</section>
+{% endblock %}

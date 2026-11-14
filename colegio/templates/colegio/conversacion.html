@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titulo %}{{ raiz.asunto }}{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'mensajes' %}">Mensajes</a><span>Conversación</span>{% endblock %}
+{% block antetitulo %}Conversación{% endblock %}
+{% block h1 %}{{ raiz.asunto }}{% endblock %}
+{% block contenido %}
+<div class="dos-columnas">
+  <div>
+    <ol class="hilo">
+    {% for m in hilo %}
+      <li class="hilo__mensaje{% if m.creado_por_id == user.pk %} hilo__mensaje--propio{% endif %}"{% if forloop.last %} id="ultimo"{% endif %}>
+        <header class="hilo__cabecera">
+          <span class="hilo__inicial" aria-hidden="true">{{ m.creado_por.nombre|slice:":1"|default:"?" }}</span>
+          <span><strong>{{ m.creado_por.nombre|default:"Usuario eliminado" }}</strong> <span class="tenue">· {{ m.creado_por.get_rol_display }}</span></span>
+          <time>{{ m.creado_en|date:"j \d\e F \d\e Y, H:i" }}</time>
+        </header>
+        {% if m.suplente_id %}<p class="traza">Escrito por {{ m.suplente.nombre }} en reemplazo de {{ m.creado_por.nombre }}.</p>{% endif %}
+        <div class="texto-largo">{{ m.cuerpo|linebreaks }}</div>
+        {% if m.archivo %}<a class="archivo" href="{% url 'mensaje_adjunto' m.pk %}">{{ m.nombre_archivo }}</a>{% endif %}
+      </li>
+    {% endfor %}
+    </ol>
+
+    <form method="post" enctype="multipart/form-data" class="tarjeta tarjeta--destacada formulario">{% csrf_token %}
+      <h2>Responder</h2>
+      {% if not participa %}<p class="nota">Usted no participa en esta conversación; la ve por ser Dirección. Si responde, pasará a ser participante.</p>{% endif %}
+      <p class="campo__ayuda">La respuesta llegará a todos los participantes de la conversación.</p>
+      {% for field in form %}{% include "partials/campo.html" %}{% endfor %}
+      <div class="acciones"><button class="boton" type="submit">Enviar respuesta</button></div>
+    </form>
+  </div>
+  <aside>
+    <section class="tarjeta">
+      <h2>Participantes</h2>
+      <ul class="lista-simple">
+      {% for p in participantes %}
+        <li><strong>{{ p.nombre }}</strong><span class="tenue">{{ p.get_rol_display }}{% if p.pk == raiz.creado_por_id %} · inició la conversación{% endif %}</span></li>
+      {% endfor %}
+      </ul>
+      {% if raiz.alumno %}
+        <h3>Estudiante relacionado</h3>
+        <p><a href="{% url 'ficha' raiz.alumno.pk %}">{{ raiz.alumno.nombre }}</a> <span class="tenue">{{ raiz.alumno.curso|default:"" }}</span></p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titulo %}Comisiones{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><span>Comisiones</span>{% endblock %}
+{% block antetitulo %}{% if user.es_direccion %}Todas las comisiones{% else %}Comisiones en las que participa{% endif %}{% endblock %}
+{% block h1 %}Comisiones{% endblock %}
+{% block contenido %}
+<div class="barra-acciones">{% if permisos.comisiones.editar %}<a class="boton" href="{% url 'comision_nueva' %}">Nueva comisión</a>{% endif %}</div>
+<div class="rejilla">
+{% for c in comisiones %}
+  <a class="curso{% if not c.activa %} curso--inactivo{% endif %}" href="{% url 'comision' c.pk %}">
+    <span class="curso__nivel">{{ c.nombre }}</span>
+    <span class="curso__alumnos">{{ c.integrantes.all|length }} integrante{{ c.integrantes.all|length|pluralize }}{% if not c.activa %} · Inactiva{% endif %}</span>
+    {% if c.descripcion %}<span class="tenue">{{ c.descripcion|truncatewords:15 }}</span>{% endif %}
+    <span class="curso__ir">Entrar →</span>
+  </a>
+{% empty %}
+  <p class="vacio">{% if user.es_direccion %}Aún no hay comisiones.{% else %}No participa en ninguna comisión.{% endif %}</p>
+{% endfor %}
+</div>
+{% endblock %}

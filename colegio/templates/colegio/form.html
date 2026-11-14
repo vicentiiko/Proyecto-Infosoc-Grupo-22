@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block antetitulo %}{{ antetitulo }}{% endblock %}
+{% block h1 %}{{ titulo }}{% endblock %}
+{% block contenido %}
+<form method="post" class="tarjeta formulario formulario--estrecho"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>
+  {% csrf_token %}
+  {% if ayuda %}<p class="nota">{{ ayuda }}</p>{% endif %}
+  {% if form.non_field_errors %}<div class="aviso aviso--error" role="alert">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>{% endif %}
+  {% for field in form %}{% include "partials/campo.html" %}{% endfor %}
+  <div class="acciones">
+    <a class="boton boton--secundario" href="{{ volver }}">Cancelar</a>
+    <button class="boton" type="submit">{{ boton }}</button>
+  </div>
+</form>
+{% endblock %}

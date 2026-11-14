@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}Estudiantes{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><span>Estudiantes</span>{% endblock %}
+{% block antetitulo %}{% if user.es_docente %}Estudiantes de mis cursos{% else %}Todos los cursos{% endif %}{% endblock %}
+{% block h1 %}Estudiantes{% endblock %}
+{% block contenido %}
+{% include "partials/filtros.html" %}
+<section class="tarjeta tarjeta--sin-relleno">
+  <header class="tarjeta__cabecera"><h2>Listado</h2><span class="etiqueta">{{ pagina.paginator.count }} estudiante{{ pagina.paginator.count|pluralize }}</span></header>
+  {% if pagina %}
+  <div class="tabla-envoltura"><table class="tabla">
+    <thead><tr><th>Nombre</th><th>RUT</th><th>Curso</th><th class="num">Atrasos</th><th class="num">Inasistencias</th><th><span class="oculto">Acción</span></th></tr></thead>
+    <tbody>{% for a in pagina %}
+      <tr><td><strong>{{ a.nombre }}</strong></td><td class="tenue">{{ a.rut }}</td><td>{{ a.curso|default:"—" }}</td>
+        <td class="num">{{ a.n_atrasos }}</td><td class="num">{{ a.n_inasist }}</td>
+        <td class="tabla__accion"><a href="{% url 'ficha' a.pk %}">Ver ficha →</a></td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="vacio">No se encontraron estudiantes.</p>{% endif %}
+</section>
+{% include "partials/paginacion.html" %}
+{% endblock %}

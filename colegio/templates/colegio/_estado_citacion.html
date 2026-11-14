@@ -1,0 +1,1 @@
+<span class="chip{% if c.estado == 'programada' or c.estado == 'reprogramada' %} chip--aviso{% elif c.estado == 'realizada' %} chip--ok{% elif c.estado == 'no_asistio' %} chip--alerta{% endif %}">{{ c.get_estado_display }}</span>

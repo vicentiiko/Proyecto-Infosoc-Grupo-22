@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}{{ curso }}{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'estudiantes' %}">Estudiantes</a><span>{{ curso }}</span>{% endblock %}
+{% block antetitulo %}Curso{% endblock %}
+{% block h1 %}{{ curso.nivel }}{% endblock %}
+{% block contenido %}
+<div class="barra-acciones">
+  {% if permisos.asistencia.editar %}<a class="boton" href="{% url 'pasar_lista' %}?curso={{ curso.pk }}">Pasar lista</a>{% endif %}
+  <a class="boton boton--secundario" href="{% url 'inasistencias' %}?curso={{ curso.pk }}">Inasistencias del curso</a>
+  <a class="boton boton--secundario" href="{% url 'atrasos' %}?curso={{ curso.pk }}">Atrasos del curso</a>
+</div>
+<div class="dos-columnas">
+  <section class="tarjeta tarjeta--sin-relleno">
+    <header class="tarjeta__cabecera"><h2>Nómina</h2><span class="etiqueta">{{ alumnos|length }} estudiante{{ alumnos|length|pluralize }}</span></header>
+    {% if alumnos %}
+    <div class="tabla-envoltura"><table class="tabla">
+      <thead><tr><th>N°</th><th>Nombre</th><th class="num">Atrasos</th><th class="num">Inasist.</th><th class="num">Sin justificar</th><th><span class="oculto">Acción</span></th></tr></thead>
+      <tbody>{% for a in alumnos %}
+        <tr><td class="tabla__num">{{ forloop.counter }}</td><td><strong>{{ a.nombre }}</strong><br><span class="tenue">{{ a.rut }}</span></td>
+          <td class="num">{{ a.n_atrasos }}</td><td class="num">{{ a.n_inasist }}</td><td class="num">{{ a.n_injust }}</td>
+          <td class="tabla__accion"><a href="{% url 'ficha' a.pk %}">Ficha →</a></td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    {% else %}<p class="vacio">Este curso no tiene estudiantes activos.</p>{% endif %}
+  </section>
+  <aside>
+    <section class="tarjeta">
+      <h2>Equipo del curso</h2>
+      <ul class="lista-simple">
+      {% for a in equipo %}<li><strong>{{ a.usuario.nombre }}</strong><span class="tenue">{{ a.usuario.get_rol_display }}{% if a.usuario.asignatura %} · {{ a.usuario.asignatura }}{% endif %}{% if a.profesor_jefe %} · Profesor(a) jefe{% endif %}</span></li>
+      {% empty %}<li class="vacio">Sin personal asignado.</li>{% endfor %}
+      </ul>
+    </section>
+  </aside>
+</div>
+{% endblock %}

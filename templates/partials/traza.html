@@ -1,0 +1,1 @@
+<span class="traza">Registrado por {{ r.creado_por.nombre|default:"—" }} el {{ r.creado_en|date:"d-m-Y H:i" }}{% if r.suplente_id %} (en reemplazo, lo hizo {{ r.suplente.nombre }}){% endif %}{% if r.fue_modificado %} · modificado por {{ r.modificado_por.nombre|default:"—" }} el {{ r.modificado_en|date:"d-m-Y H:i" }}{% endif %}</span>

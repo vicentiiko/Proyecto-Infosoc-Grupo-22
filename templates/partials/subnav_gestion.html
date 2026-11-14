@@ -1,0 +1,8 @@
+<nav class="pestanas" aria-label="Gestión">
+  {% with n=request.resolver_match.url_name %}
+  <a href="{% url 'usuarios' %}"{% if n == 'usuarios' %} aria-current="page"{% endif %}>Usuarios</a>
+  <a href="{% url 'pupilos' %}"{% if n == 'pupilos' %} aria-current="page"{% endif %}>Pupilos</a>
+  <a href="{% url 'cursos' %}"{% if n == 'cursos' %} aria-current="page"{% endif %}>Cursos</a>
+  <a href="{% url 'suplencias' %}"{% if n == 'suplencias' %} aria-current="page"{% endif %}>Reemplazos</a>
+  {% endwith %}
+</nav>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Recursos digitales{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><span>Recursos</span>{% endblock %}
+{% block antetitulo %}{% if user.es_direccion %}Todos los recursos{% else %}Compartidos con usted{% endif %}{% endblock %}
+{% block h1 %}Recursos digitales{% endblock %}
+{% block contenido %}
+<div class="barra-acciones">{% if permisos.recursos.editar %}<a class="boton" href="{% url 'recurso_nuevo' %}">Subir recurso</a>{% endif %}</div>
+<form method="get" class="filtros">
+  <label class="filtros__campo filtros__campo--ancho"><span>Buscar</span><input name="q" value="{{ q }}" placeholder="Título o descripción"></label>
+  <div class="filtros__acciones"><button class="boton boton--chico" type="submit">Buscar</button>{% if q %}<a class="enlace" href="{% url 'recursos' %}">Limpiar</a>{% endif %}</div>
+</form>
+<div class="rejilla rejilla--recursos">
+{% for r in pagina %}
+  <article class="recurso">
+    <span class="recurso__tipo">{{ r.extension }}</span>
+    <h3>{{ r.titulo }}</h3>
+    {% if r.descripcion %}<p>{{ r.descripcion|truncatewords:25 }}</p>{% endif %}
+    <div class="recurso__visibilidad">
+      <span class="tenue">Visible para:</span>
+      {% if r.para_todos %}<span class="chip chip--ok">Todos</span>{% endif %}
+      {% if r.todos_docentes %}<span class="chip">Docentes</span>{% endif %}
+      {% if r.todos_psicologos %}<span class="chip">Psicólogos</span>{% endif %}
+      {% for u in r.usuarios.all %}<span class="chip">{{ u.nombre }}</span>{% endfor %}
+      {% if not r.para_todos and not r.todos_docentes and not r.todos_psicologos and not r.usuarios.all %}<span class="chip chip--reservado">Privado</span>{% endif %}
+    </div>
+    <span class="traza">Subido por {{ r.creado_por.nombre|default:"—" }} el {{ r.creado_en|date:"d-m-Y" }}</span>
+    <div class="recurso__acciones">
+      <a class="boton boton--chico" href="{% url 'recurso_descargar' r.pk %}">Descargar</a>
+      {% if r.creado_por_id == user.pk or user.es_direccion %}<a class="enlace" href="{% url 'recurso_editar' r.pk %}">Editar</a><a class="enlace" href="{% url 'recurso_eliminar' r.pk %}">Eliminar</a>{% endif %}
+    </div>
+  </article>
+{% empty %}
+  <p class="vacio">No hay recursos disponibles para usted.</p>
+{% endfor %}
+</div>
+{% include "partials/paginacion.html" %}
+{% endblock %}

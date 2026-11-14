@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Confirmar eliminación{% endblock %}
+{% block antetitulo %}Confirmar{% endblock %}
+{% block h1 %}¿Eliminar registro?{% endblock %}
+{% block contenido %}
+<form method="post" class="tarjeta tarjeta--centrada">{% csrf_token %}
+  <p>Se eliminará {{ descripcion }}. Esta acción no se puede deshacer.</p>
+  <div class="acciones acciones--centro">
+    <a class="boton boton--secundario" href="{{ volver }}">Cancelar</a>
+    <button class="boton boton--peligro" type="submit">Sí, eliminar</button>
+  </div>
+</form>
+{% endblock %}

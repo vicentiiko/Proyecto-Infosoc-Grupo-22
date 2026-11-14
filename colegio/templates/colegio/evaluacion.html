@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Evaluación{% endblock %}
+{% block migas %}<a href="{% url 'inicio' %}">Inicio</a><a href="{% url 'evaluaciones' %}">Evaluaciones</a><span>{{ e.alumno.nombre }}</span>{% endblock %}
+{% block antetitulo %}{{ e.tipo }}{% endblock %}
+{% block h1 %}{{ e.alumno.nombre }}{% endblock %}
+{% block contenido %}
+<div class="dos-columnas">
+  <section class="tarjeta tarjeta--reservada">
+    <header class="tarjeta__titulo"><h2>Resultados <span class="chip chip--reservado">Reservado</span></h2>
+      {% if permisos.evaluaciones.editar %}<a class="boton boton--chico" href="{% url 'evaluacion_editar' e.pk %}">Editar</a>{% endif %}</header>
+    <dl class="datos">
+      <div><dt>Fecha</dt><dd>{{ e.fecha|date:"j \d\e F \d\e Y" }}</dd></div>
+      <div><dt>Próxima reevaluación</dt><dd>{{ e.proxima_reevaluacion|date:"j \d\e F \d\e Y" }} {% include "colegio/_estado_eval.html" %}</dd></div>
+      <div><dt>Curso</dt><dd>{{ e.alumno.curso|default:"—" }}</dd></div>
+    </dl>
+    <div class="texto-largo">{{ e.resultados|linebreaks }}</div>
+    {% include "partials/traza.html" with r=e %}
+  </section>
+  <aside>
+    <section class="tarjeta">
+      <h2>Historial de este tipo</h2>
+      <ul class="lista-simple">
+      {% for h in historial %}<li>{% if h.pk == e.pk %}<strong>{{ h.fecha|date:"d-m-Y" }} (esta)</strong>{% else %}<a href="{% url 'evaluacion' h.pk %}">{{ h.fecha|date:"d-m-Y" }}</a>{% endif %}<span class="tenue">{{ h.creado_por.nombre|default:"" }}</span></li>{% endfor %}
+      </ul>
+      <p><a class="volver" href="{% url 'ficha' e.alumno.pk %}#evaluaciones">Ir a la ficha →</a></p>
+    </section>
+  </aside>
+</div>
+{% endblock %}

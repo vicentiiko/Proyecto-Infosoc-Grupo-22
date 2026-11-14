@@ -1,0 +1,31 @@
+{% if field.is_hidden %}{{ field }}{% else %}{% with t=field.widget_type %}
+{% if t == "checkbox" %}
+<div class="campo campo--casilla">
+  <label class="casilla">{{ field }}<span>{{ field.label }}</span></label>
+  {% if field.help_text %}<span class="campo__ayuda">{{ field.help_text }}</span>{% endif %}
+  {% for e in field.errors %}<span class="campo__error">{{ e }}</span>{% endfor %}
+</div>
+{% elif t == "checkboxselectmultiple" or t == "radioselect" %}
+<fieldset class="campo">
+  <legend class="campo__etiqueta">{{ field.label }}</legend>
+  {% if field.help_text %}<span class="campo__ayuda">{{ field.help_text }}</span>{% endif %}
+  {% if field.field.choices|length > 6 %}
+  <div class="buscador">
+    <input type="search" data-buscar placeholder="Buscar en la lista…" aria-label="Buscar en {{ field.label }}">
+    <span class="buscador__conteo"></span>
+  </div>
+  {% endif %}
+  <div class="opciones">
+  {% for c in field %}<label class="opcion">{{ c.tag }}<span>{{ c.choice_label }}</span></label>
+  {% empty %}<p class="vacio">No hay opciones disponibles.</p>{% endfor %}
+  </div>
+  {% for e in field.errors %}<span class="campo__error">{{ e }}</span>{% endfor %}
+</fieldset>
+{% else %}
+<div class="campo">
+  <label class="campo__etiqueta" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="obligatorio" aria-hidden="true">*</span>{% endif %}</label>
+  {{ field }}
+  {% if field.help_text %}<span class="campo__ayuda">{{ field.help_text }}</span>{% endif %}
+  {% for e in field.errors %}<span class="campo__error">{{ e }}</span>{% endfor %}
+</div>
+{% endif %}{% endwith %}{% endif %}
