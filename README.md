@@ -2,16 +2,16 @@
 
 Plataforma web interna de gestión escolar. Reúne en un solo historial por estudiante la asistencia,
 las observaciones, las evaluaciones y las citaciones, e incluye mensajería interna entre los tres roles que la usan:
-**Dirección**, **Psicóloga** y **Docentes**. Los apoderados **no** son usuarios: quedan solo como datos de contacto.
+Dirección, Psicóloga y Docentes. Los apoderados no son usuarios: quedan solo como datos de contacto.
 
 Implementa el *Documento de mejoras* (M-01 a M-11).
 
-**Tecnologías:** Python 3.12+, Django 6.1, SQLite. Interfaz en español (`es-cl`, hora de Santiago).
+**Tecnologías:** Python 3.12+, Django 6.1, SQLite. 
 
 ## Requisitos
 - **Python 3.12 o superior** (Django 6 lo requiere). Descargar desde https://www.python.org/downloads/
-  - En Windows, al instalar marca **"Add python.exe to PATH"**.
-  - Comprueba que quedó bien con `python --version` (o `py --version` en Windows).
+  - En Windows, al instalar marcar **"Add python.exe to PATH"**.
+  - Comprobar que quedó bien con `python --version` (o `py --version` en Windows).
 - Git (opcional, para clonar el repositorio).
 
 ## Puesta en marcha
@@ -24,20 +24,20 @@ Todos los comandos se escriben en una terminal abierta **en la carpeta del proye
    ```bash
    python -m venv venv
    ```
-   (En Windows, si `python` no funciona, usa `py -m venv venv`. En Linux/Mac puede ser `python3`.)
+   (En Windows, si `python` no funciona, usar `py -m venv venv`. En Linux/Mac puede ser `python3`.)
 
 2. Activar el entorno virtual:
    - **Windows (PowerShell):**
      ```powershell
      venv\Scripts\activate
      ```
-     Si sale el error *"la ejecución de scripts está deshabilitada"*, corre una sola vez
-     `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` y vuelve a activar.
+     Si sale el error *"la ejecución de scripts está deshabilitada"*, correr una sola vez
+     `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` y volver a activar.
    - **Linux / Mac:**
      ```bash
      source venv/bin/activate
      ```
-   Sabrás que quedó activo porque la terminal muestra `(venv)` al inicio de la línea.
+   Se sabrá que quedó activo porque la terminal muestra `(venv)` al inicio de la línea.
 
 3. Instalar las dependencias:
    ```bash
@@ -70,7 +70,7 @@ Para **detener** el servidor, presiona `Ctrl + C` en la terminal.
 
 ### Las próximas veces
 
-Los pasos 1, 3, 4 y 5 se hacen una sola vez. Después solo necesitas:
+Los pasos 1, 3, 4 y 5 se hacen una sola vez. Después solo se necesita:
 ```bash
 venv\Scripts\activate          # Linux/Mac: source venv/bin/activate
 python manage.py runserver
@@ -83,7 +83,7 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 `migrate` aplica los cambios de estructura a la base sin borrar los datos.
-Si vienes de la versión anterior, donde los apoderados iniciaban sesión, la estructura cambió por completo: borra `db.sqlite3` y repite los pasos 4 y 5.
+Si se viene de la versión anterior, donde los apoderados iniciaban sesión, la estructura cambió por completo: borra `db.sqlite3` y repite los pasos 4 y 5.
 
 ## Cuentas de prueba
 | Rol | Nombre | RUT | Contraseña | Cursos |
